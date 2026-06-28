@@ -87,7 +87,7 @@ export function Header({ onQuoteClick, onNavigate, currentPath }: HeaderProps) {
                 <img 
                   src="/images/logo.png" 
                   alt="Cotton Dome Logo" 
-                  className="w-10 h-10 object-contain transition-transform duration-500 group-hover:scale-105" 
+                  className="w-12 h-12 object-contain transition-transform duration-500 group-hover:scale-105" 
                 />
                 <div className="flex flex-col">
                   <span className="text-white font-bold tracking-widest text-lg leading-none uppercase">

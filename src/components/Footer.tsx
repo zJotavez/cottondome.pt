@@ -58,7 +58,7 @@ export function Footer({ onNavigate }: FooterProps) {
               <img 
                 src="/images/logo.png" 
                 alt="Cotton Dome Logo" 
-                className="w-8 h-8 object-contain" 
+                className="w-10 h-10 object-contain" 
               />
               <div className="flex flex-col">
                 <span className="font-display text-sm tracking-widest text-white font-bold leading-none">
