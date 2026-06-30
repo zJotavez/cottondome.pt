@@ -12,7 +12,7 @@ export function Footer({ onNavigate, settings }: FooterProps) {
   const currentYear = 2026;
 
   const phoneVal = settings?.phone || CONTACT_INFO.phone;
-  const emailVal = settings?.email || CONTACT_INFO.email;
+  const emailVal = settings?.email && !settings.email.includes("[") && settings.email.trim() !== "" ? settings.email : "suporte@domme.pt";
   const addressVal = settings?.address || CONTACT_INFO.address;
   const logo = settings?.logo;
 

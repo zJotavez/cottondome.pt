@@ -85,7 +85,7 @@ export function ContactForm({ selectedService, onClearService, settings, service
   // Resolve contact settings
   const phoneVal = settings?.phone || CONTACT_INFO.phone;
   const whatsappVal = settings?.whatsapp || CONTACT_INFO.whatsapp;
-  const emailVal = settings?.email || CONTACT_INFO.email;
+  const emailVal = settings?.email && !settings.email.includes("[") && settings.email.trim() !== "" ? settings.email : "suporte@domme.pt";
   const addressVal = settings?.address || CONTACT_INFO.address;
   const hoursWeekVal = settings?.working_hours_week || CONTACT_INFO.workingHoursWeek;
   const hoursSatVal = settings?.working_hours_sat || CONTACT_INFO.workingHoursSat;
