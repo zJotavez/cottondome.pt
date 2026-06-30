@@ -176,19 +176,6 @@ export function ContactForm({ selectedService, onClearService, settings, service
                   </div>
                 </div>
 
-                {/* Email */}
-                <div className="flex gap-4 items-start">
-                  <div className="w-10 h-10 rounded bg-[#1A1A1A] border border-[#E2AF55]/25 flex items-center justify-center text-[#E2AF55] flex-shrink-0">
-                    <Mail className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="block font-display text-[10px] uppercase tracking-wider text-gray-500 font-bold">E-mail</span>
-                    <a href={emailHref} className="block text-sm text-white hover:text-[#E2AF55] font-sans transition-colors mt-0.5">
-                      {emailVal}
-                    </a>
-                  </div>
-                </div>
-
                 {/* Map location */}
                 <div className="flex gap-4 items-start">
                   <div className="w-10 h-10 rounded bg-[#1A1A1A] border border-[#E2AF55]/25 flex items-center justify-center text-[#E2AF55] flex-shrink-0">

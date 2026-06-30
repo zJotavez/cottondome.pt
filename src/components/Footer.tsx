@@ -147,18 +147,6 @@ export function Footer({ onNavigate, settings }: FooterProps) {
                 </a>
               </li>
               <li className="flex items-start gap-2.5">
-                <Mail className="w-4 h-4 text-[#C28D35] mt-0.5 flex-shrink-0" />
-                <a 
-                  href={emailHref} 
-                  onClick={(e) => {
-                    if (isEmailPlaceholder) handleLinkClick(e, "#contacto");
-                  }}
-                  className="text-xs text-gray-400 hover:text-white leading-relaxed"
-                >
-                  {emailVal}
-                </a>
-              </li>
-              <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[#C28D35] mt-0.5 flex-shrink-0" />
                 <span className="text-xs text-gray-400 leading-relaxed">
                   {addressVal}
