@@ -2,8 +2,15 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { PROJECTS } from "../data";
 import { Shield, Eye } from "lucide-react";
+import { DbGallery } from "../types";
 
-export function Projects() {
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
+interface ProjectsProps {
+  gallery?: DbGallery[];
+}
+
+export function Projects({ gallery }: ProjectsProps) {
   const [activeFilter, setActiveFilter] = useState("all");
 
   const filters = [
@@ -15,9 +22,30 @@ export function Projects() {
     { id: "incendio", label: "Incêndio" },
   ];
 
-  const filteredProjects = PROJECTS.filter((proj) => {
+  // Use DB gallery if provided, else use static data
+  const activeProjects = gallery && gallery.length > 0 ? gallery : PROJECTS;
+
+  const filteredProjects = activeProjects.filter((proj) => {
     return activeFilter === "all" || proj.category === activeFilter;
   });
+
+  const getCategoryLabel = (cat: string) => {
+    switch (cat.toLowerCase()) {
+      case "cctv": return "CCTV / Videovigilância";
+      case "automatismos": return "Automatismos / Portões";
+      case "acessos": return "Controlo de Acessos";
+      case "redes": return "Redes & Telecomunicações";
+      case "incendio": return "Deteção de Incêndio";
+      default: return cat.toUpperCase();
+    }
+  };
+
+  const resolveImageUrl = (img: string) => {
+    if (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:")) {
+      return img;
+    }
+    return `${API_BASE}/${img}`;
+  };
 
   return (
     <section id="projetos" className="py-24 bg-[#0a0a0a] relative overflow-hidden border-t border-[#1a1a1a]">
@@ -77,60 +105,64 @@ export function Projects() {
         {/* Gallery Grid (2 columns on Mobile, 3 on Large) */}
         <motion.div layout className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
           <AnimatePresence mode="popLayout">
-            {filteredProjects.map((proj, idx) => (
-              <motion.div
-                layout
-                key={proj.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4 }}
-                className={`group relative rounded-xl overflow-hidden card-luxury ${
-                  idx % 2 === 0 ? "h-[295px] sm:h-[410px]" : "h-[355px] sm:h-[410px]"
-                }`}
-              >
-                {/* Image Wrap */}
-                <div className={`relative w-full overflow-hidden ${
-                  idx % 2 === 0 ? "h-[165px] sm:h-[250px]" : "h-[225px] sm:h-[250px]"
-                }`}>
-                  {/* Subtle Golden Outline Ring */}
-                  <div className="absolute inset-2 border border-[#E2AF55]/10 group-hover:border-[#E2AF55]/35 rounded-lg z-20 pointer-events-none transition-all duration-500"></div>
+            {filteredProjects.map((proj: any, idx) => {
+              const categoryLabel = proj.categoryLabel || getCategoryLabel(proj.category);
+              const imgUrl = resolveImageUrl(proj.image);
 
-                  <img
-                    src={proj.image}
-                    alt={proj.title}
-                    className="w-full h-full object-cover mix-blend-luminosity brightness-75 group-hover:mix-blend-normal group-hover:scale-105 transition-all duration-750 ease-out"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-black/25 to-transparent z-10"></div>
-                  
-                  {/* Hover Icon overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 bg-black/40">
-                    <div className="w-10 h-10 rounded-full bg-[#E2AF55] flex items-center justify-center text-black shadow-lg shadow-[#E2AF55]/35">
-                      <Eye className="w-5 h-5" />
+              return (
+                <motion.div
+                  layout
+                  key={proj.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.4 }}
+                  className={`group relative rounded-xl overflow-hidden card-luxury ${
+                    idx % 2 === 0 ? "h-[295px] sm:h-[410px]" : "h-[355px] sm:h-[410px]"
+                  }`}
+                >
+                  {/* Image Wrap */}
+                  <div className={`relative w-full overflow-hidden ${
+                    idx % 2 === 0 ? "h-[165px] sm:h-[250px]" : "h-[225px] sm:h-[250px]"
+                  }`}>
+                    {/* Subtle Golden Outline Ring */}
+                    <div className="absolute inset-2 border border-[#E2AF55]/10 group-hover:border-[#E2AF55]/35 rounded-lg z-20 pointer-events-none transition-all duration-500"></div>
+
+                    <img
+                      src={imgUrl}
+                      alt={proj.title}
+                      className="w-full h-full object-cover mix-blend-luminosity brightness-75 group-hover:mix-blend-normal group-hover:scale-105 transition-all duration-750 ease-out"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-black/25 to-transparent z-10"></div>
+                    
+                    {/* Hover Icon overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 bg-black/40">
+                      <div className="w-10 h-10 rounded-full bg-[#E2AF55] flex items-center justify-center text-black shadow-lg shadow-[#E2AF55]/35">
+                        <Eye className="w-5 h-5" />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Info block */}
-                <div className="h-[130px] sm:h-[160px] p-3 sm:p-5 flex flex-col justify-start gap-0.5 sm:gap-1">
-                  <div>
-                    <span className="font-mono text-[8px] sm:text-[9px] text-[#E2AF55] uppercase tracking-widest block mb-0.5">
-                      {proj.categoryLabel}
-                    </span>
-                    <h3 className="font-display font-bold text-xs sm:text-base text-white group-hover:text-[#E2AF55] transition-colors duration-300 leading-tight">
-                      {proj.title}
-                    </h3>
+                  {/* Info block */}
+                  <div className="h-[130px] sm:h-[160px] p-3 sm:p-5 flex flex-col justify-start gap-0.5 sm:gap-1">
+                    <div>
+                      <span className="font-mono text-[8px] sm:text-[9px] text-[#E2AF55] uppercase tracking-widest block mb-0.5">
+                        {categoryLabel}
+                      </span>
+                      <h3 className="font-display font-bold text-xs sm:text-base text-white group-hover:text-[#E2AF55] transition-colors duration-300 leading-tight">
+                        {proj.title}
+                      </h3>
+                    </div>
+                    <p className="text-[10px] sm:text-xs text-[#D9D9D9] font-sans line-clamp-2 mt-1 leading-normal sm:leading-relaxed">
+                      {proj.description}
+                    </p>
                   </div>
-                  <p className="text-[10px] sm:text-xs text-[#D9D9D9] font-sans line-clamp-2 mt-1 leading-normal sm:leading-relaxed">
-                    {proj.description}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </motion.div>
-
       </div>
     </section>
   );

@@ -7,9 +7,10 @@ interface HeaderProps {
   onQuoteClick: () => void;
   onNavigate: (path: string) => void;
   currentPath: string;
+  logo?: string;
 }
 
-export function Header({ onQuoteClick, onNavigate, currentPath }: HeaderProps) {
+export function Header({ onQuoteClick, onNavigate, currentPath, logo }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -57,6 +58,8 @@ export function Header({ onQuoteClick, onNavigate, currentPath }: HeaderProps) {
     }
   };
 
+  const logoSrc = logo && logo !== "" ? (logo.startsWith("http") ? logo : `${import.meta.env.VITE_API_URL || ''}/${logo.replace(/^\//, '')}`) : "/images/logo.png";
+
   return (
     <>
       <header
@@ -85,7 +88,7 @@ export function Header({ onQuoteClick, onNavigate, currentPath }: HeaderProps) {
                 className="flex items-center gap-3 group"
               >
                 <img 
-                  src="/images/logo.png" 
+                  src={logoSrc} 
                   alt="Cotton Dome Logo" 
                   className="w-12 h-12 object-contain transition-transform duration-500 group-hover:scale-105" 
                 />

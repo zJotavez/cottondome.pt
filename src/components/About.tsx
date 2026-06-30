@@ -1,14 +1,35 @@
 import React from "react";
 import { motion } from "motion/react";
 import { ShieldAlert, Cpu, Network, CheckCircle2 } from "lucide-react";
+import { AboutContent } from "../types";
 
-export function About() {
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
+interface AboutProps {
+  content?: AboutContent;
+}
+
+export function About({ content }: AboutProps) {
   const bulletPoints = [
     { text: "Instalações profissionais sob rigorosos critérios de engenharia", icon: <CheckCircle2 className="w-4 h-4 text-[#E2AF55]" /> },
     { text: "Equipamentos de alto padrão tecnológico (Motorline e Visiotech)", icon: <CheckCircle2 className="w-4 h-4 text-[#E2AF55]" /> },
     { text: "Projetos 100% personalizados, ajustados ao seu espaço real", icon: <CheckCircle2 className="w-4 h-4 text-[#E2AF55]" /> },
     { text: "Suporte pós-instalação de alta fiabilidade em território nacional", icon: <CheckCircle2 className="w-4 h-4 text-[#E2AF55]" /> },
   ];
+
+  // Resolve media URLs (check if they are relative DB uploads or absolute links)
+  const resolveMediaUrl = (url: string | undefined, defaultUrl: string) => {
+    if (!url) return defaultUrl;
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+      return url;
+    }
+    return `${API_BASE}/${url}`;
+  };
+
+  const aboutTitle = content?.title || "Sobre a Cotton Dome LDA";
+  const aboutDesc = content?.description || "A Cotton Dome LDA atua no desenvolvimento de soluções inteligentes para segurança, automação e infraestrutura técnica. Com foco em qualidade, confiança e profissionalismo, oferecemos serviços em videovigilância, intrusão, controlo de acessos, deteção de incêndio, automatismos, redes, telecomunicações, UPS, serralharia e portões de segurança.";
+  const videoSource = resolveMediaUrl(content?.video, `${import.meta.env.BASE_URL}videos/video2.mp4`);
+  const imageSource = resolveMediaUrl(content?.image, "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80");
 
   return (
     <section id="sobre" className="py-24 bg-[#050505] relative overflow-hidden border-t border-[#1a1a1a]">
@@ -18,9 +39,10 @@ export function About() {
         loop
         muted
         playsInline
+        key={videoSource} // Force video reload when source changes
         className="absolute inset-0 w-full h-full object-cover opacity-65"
       >
-        <source src={`${import.meta.env.BASE_URL}videos/video2.mp4`} type="video/mp4" />
+        <source src={videoSource} type="video/mp4" />
       </video>
 
       {/* Tech Grid Overlay */}
@@ -55,7 +77,15 @@ export function About() {
               viewport={{ once: true }}
               className="text-3xl sm:text-4xl font-display font-extrabold text-white tracking-tight mb-6"
             >
-              Sobre a <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C28D35] via-[#E2AF55] to-[#A37125] filter drop-shadow-[0_2px_10px_rgba(226,175,85,0.15)]">Cotton Dome LDA</span>
+              {aboutTitle.includes("Cotton Dome") ? (
+                <span>
+                  {aboutTitle.split("Cotton Dome")[0]}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C28D35] via-[#E2AF55] to-[#A37125] filter drop-shadow-[0_2px_10px_rgba(226,175,85,0.15)]">Cotton Dome</span>
+                  {aboutTitle.split("Cotton Dome")[1]}
+                </span>
+              ) : (
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C28D35] via-[#E2AF55] to-[#A37125] filter drop-shadow-[0_2px_10px_rgba(226,175,85,0.15)]">{aboutTitle}</span>
+              )}
             </motion.h2>
 
             <motion.div
@@ -65,26 +95,53 @@ export function About() {
               transition={{ delay: 0.1 }}
               className="space-y-4 text-sm sm:text-base text-[#D9D9D9] font-sans leading-relaxed mb-8"
             >
-              <p>
-                A <strong className="text-white font-semibold">Cotton Dome LDA</strong> atua no desenvolvimento de soluções inteligentes para segurança, automação e infraestrutura técnica. Com foco em qualidade, confiança e profissionalismo, oferecemos serviços em videovigilância, intrusão, controlo de acessos, deteção de incêndio, automatismos, redes, telecomunicações, UPS, serralharia e portões de segurança.
-              </p>
+              <p>{aboutDesc}</p>
             </motion.div>
 
-            {/* Structured Bullet list */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-[#222] pt-6"
-            >
-              {bulletPoints.map((pt, idx) => (
-                <div key={idx} className="flex items-start gap-2.5">
-                  <div className="mt-1 flex-shrink-0">{pt.icon}</div>
-                  <span className="text-xs text-[#D9D9D9] font-sans leading-relaxed">{pt.text}</span>
-                </div>
-              ))}
-            </motion.div>
+            {/* Mission, Vision, Values or Default Bullet list */}
+            {content?.mission || content?.vision || content?.values ? (
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="grid grid-cols-1 sm:grid-cols-3 gap-6 border-t border-[#222] pt-6"
+              >
+                {content.mission && (
+                  <div>
+                    <span className="block font-mono text-[9px] text-[#E2AF55] uppercase tracking-widest mb-1.5 font-bold">Missão</span>
+                    <p className="text-xs text-[#CFCFCF] font-sans leading-relaxed">{content.mission}</p>
+                  </div>
+                )}
+                {content.vision && (
+                  <div>
+                    <span className="block font-mono text-[9px] text-[#E2AF55] uppercase tracking-widest mb-1.5 font-bold">Visão</span>
+                    <p className="text-xs text-[#CFCFCF] font-sans leading-relaxed">{content.vision}</p>
+                  </div>
+                )}
+                {content.values && (
+                  <div>
+                    <span className="block font-mono text-[9px] text-[#E2AF55] uppercase tracking-widest mb-1.5 font-bold">Valores</span>
+                    <p className="text-xs text-[#CFCFCF] font-sans leading-relaxed">{content.values}</p>
+                  </div>
+                )}
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-[#222] pt-6"
+              >
+                {bulletPoints.map((pt, idx) => (
+                  <div key={idx} className="flex items-start gap-2.5">
+                    <div className="mt-1 flex-shrink-0">{pt.icon}</div>
+                    <span className="text-xs text-[#D9D9D9] font-sans leading-relaxed">{pt.text}</span>
+                  </div>
+                ))}
+              </motion.div>
+            )}
           </div>
 
           {/* Right Side: Luxury Graphic Layout */}
@@ -99,7 +156,7 @@ export function About() {
               {/* Inner Border Layer */}
               <div className="absolute inset-2 border border-[#222] rounded-xl overflow-hidden">
                 <img
-                  src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80"
+                  src={imageSource}
                   alt="Infraestrutura Técnica Cotton Dome"
                   className="w-full h-full object-cover mix-blend-luminosity brightness-50 contrast-125 hover:scale-105 hover:mix-blend-normal transition-all duration-750 ease-out"
                   referrerPolicy="no-referrer"
@@ -127,3 +184,4 @@ export function About() {
     </section>
   );
 }
+

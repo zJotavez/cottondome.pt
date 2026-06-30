@@ -1,20 +1,40 @@
 import React, { useEffect } from "react";
-import { SERVICES_DATA, ServiceDetails } from "../servicesData";
+import { SERVICES_DATA } from "../servicesData";
 import { LucideIcon } from "./LucideIcon";
 import { ArrowLeft, CheckCircle2, ShieldCheck, HelpCircle } from "lucide-react";
 import { motion } from "motion/react";
+import { DbService, DbServicePage } from "../types";
+
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
 interface ServiceDetailProps {
   slug: string;
   onNavigate: (path: string) => void;
+  services?: DbService[];
+  pages?: DbServicePage[];
 }
 
-export function ServiceDetail({ slug, onNavigate }: ServiceDetailProps) {
-  const service = SERVICES_DATA.find((s) => s.slug === slug);
+export function ServiceDetail({ slug, onNavigate, services, pages }: ServiceDetailProps) {
+  // Resolve service from DB or static fallback
+  const service = services?.find((s) => s.slug === slug) || SERVICES_DATA.find((s) => s.slug === slug);
+  const pageDetails = pages?.find((p) => p.service_id === service?.id);
+
+  // Safe JSON Parsing helper
+  const parseJsonArray = (val: any, defaultVal: any[]) => {
+    if (!val) return defaultVal;
+    if (Array.isArray(val)) return val;
+    try {
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) ? parsed : defaultVal;
+    } catch (e) {
+      return defaultVal;
+    }
+  };
 
   useEffect(() => {
     if (service) {
-      document.title = `${service.seoTitle}`;
+      const seoTitle = service.seoTitle || service.title + " | Cotton Dome LDA";
+      document.title = seoTitle;
       
       // Update SEO Meta Description
       let metaDesc = document.querySelector('meta[name="description"]');
@@ -23,7 +43,8 @@ export function ServiceDetail({ slug, onNavigate }: ServiceDetailProps) {
         metaDesc.setAttribute('name', 'description');
         document.head.appendChild(metaDesc);
       }
-      metaDesc.setAttribute('content', service.seoDescription);
+      const seoDesc = service.seoDescription || (service as any).shortDescription || "";
+      metaDesc.setAttribute('content', seoDesc);
     }
     // Scroll to top when loading page
     window.scrollTo(0, 0);
@@ -50,15 +71,22 @@ export function ServiceDetail({ slug, onNavigate }: ServiceDetailProps) {
     );
   }
 
-  const workSteps = [
+  // Resolve fields from pageDetails or service/static fallback
+  const slogan = pageDetails?.slogan || (service as any).slogan || "Soluções Técnicas Personalizadas";
+  const mainDesc = pageDetails?.description || service.description || "";
+  const benefits = parseJsonArray(pageDetails?.benefits, (service as any).benefits || []);
+  const products = parseJsonArray(pageDetails?.products, (service as any).products || []);
+  const galleryImages = parseJsonArray(pageDetails?.gallery_images, (service as any).galleryImages || []);
+
+  const defaultWorkSteps = [
     { num: "01", title: "Análise Técnica", desc: "Avaliamos minuciosamente o espaço físico e compreendemos a sua necessidade de segurança." },
-    { num: "02", title: "Escolha da Solução", desc: "Dimensionamos os equipamentos de alta tecnologia mais ajustados à sua reality." },
+    { num: "02", title: "Escolha da Solução", desc: "Dimensionamos os equipamentos de alta tecnologia mais ajustados à sua realidade." },
     { num: "03", title: "Instalação Profissional", desc: "Executamos a montagem com rigor técnico, organização técnica e respeito estético." },
     { num: "04", title: "Configuração", desc: "Configuramos todos os sistemas e realizamos testes lógicos completos de funcionamento." },
     { num: "05", title: "Suporte e Acompanhamento", desc: "Garantimos assistência técnica dedicada pós-venda para manter a proteção activa." }
   ];
 
-  const appLocations = [
+  const defaultAppLocations = [
     { name: "Residências", desc: "Proteção personalizada e automatismos para o conforto do seu lar." },
     { name: "Condomínios", desc: "Controlo seguro de acessos comuns e vigilância perimetral." },
     { name: "Empresas", desc: "Gestão inteligente de segurança e redes corporativas robustas." },
@@ -67,6 +95,20 @@ export function ServiceDetail({ slug, onNavigate }: ServiceDetailProps) {
     { name: "Armazéns", desc: "Racks organizados, UPS de backup e proteção perimetral total." }
   ];
 
+  const appLocations = parseJsonArray(pageDetails?.applications, defaultAppLocations);
+
+  // Resolve media URLs
+  const resolveMediaUrl = (url: string | undefined, defaultUrl: string) => {
+    if (!url) return defaultUrl;
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+      return url;
+    }
+    return `${API_BASE}/${url}`;
+  };
+
+  const mainImage = resolveMediaUrl(service.image, "");
+  const iconName = service.icon || (service as any).iconName || "Camera";
+
   return (
     <main className="bg-[#050505] text-[#CFCFCF] min-h-screen">
       
@@ -74,7 +116,7 @@ export function ServiceDetail({ slug, onNavigate }: ServiceDetailProps) {
       <section className="relative h-[480px] flex items-center justify-center overflow-hidden border-b border-[#1a1a1a]">
         {/* Background Image */}
         <img
-          src={service.image.startsWith("http") ? service.image : `${import.meta.env.BASE_URL}${service.image.replace(/^\//, "")}`}
+          src={mainImage}
           alt={service.title}
           className="absolute inset-0 w-full h-full object-cover filter brightness-[0.25] contrast-[1.1] pointer-events-none"
         />
@@ -92,7 +134,7 @@ export function ServiceDetail({ slug, onNavigate }: ServiceDetailProps) {
             transition={{ duration: 0.5 }}
             className="w-12 h-12 rounded-lg bg-[#111111]/90 border border-[#E2AF55]/45 flex items-center justify-center text-[#E2AF55] mx-auto mb-6 shadow-lg shadow-[#E2AF55]/10"
           >
-            <LucideIcon name={service.iconName} className="w-6 h-6" />
+            <LucideIcon name={iconName} className="w-6 h-6" />
           </motion.div>
 
           <motion.h1
@@ -110,7 +152,7 @@ export function ServiceDetail({ slug, onNavigate }: ServiceDetailProps) {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="font-mono text-xs sm:text-sm text-[#E2AF55] uppercase tracking-widest max-w-3xl mx-auto mb-8 font-semibold"
           >
-            {service.slogan}
+            {slogan}
           </motion.p>
 
           <motion.div
@@ -144,7 +186,7 @@ export function ServiceDetail({ slug, onNavigate }: ServiceDetailProps) {
                 Sobre o Serviço
               </h2>
               <p className="text-sm sm:text-base text-[#D9D9D9] font-sans leading-relaxed mb-6">
-                {service.description}
+                {mainDesc}
               </p>
               <p className="text-xs sm:text-sm text-gray-400 font-sans leading-relaxed">
                 Desenvolvemos projetos robustos e funcionais que atendem rigorosamente aos padrões europeus de segurança técnica. Todos os equipamentos por nós instalados são de marcas consagradas, assegurando maior longevidade operacional, estabilidade lógica e garantias completas de fábrica.
@@ -157,7 +199,7 @@ export function ServiceDetail({ slug, onNavigate }: ServiceDetailProps) {
                 Principais Benefícios
               </h2>
               <ul className="space-y-4">
-                {service.benefits.map((benefit, idx) => (
+                {benefits.map((benefit: any, idx: number) => (
                   <li key={idx} className="flex items-start gap-3">
                     <CheckCircle2 className="w-5 h-5 text-[#E2AF55] mt-0.5 flex-shrink-0" />
                     <span className="text-xs sm:text-sm text-[#D9D9D9] font-sans capitalize leading-tight">
@@ -232,7 +274,7 @@ export function ServiceDetail({ slug, onNavigate }: ServiceDetailProps) {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {service.products.map((prod, idx) => (
+            {products.map((prod: any, idx: number) => (
               <div
                 key={idx}
                 className="card-luxury p-4 rounded text-center group flex flex-col items-center justify-center min-h-[90px]"
@@ -247,7 +289,7 @@ export function ServiceDetail({ slug, onNavigate }: ServiceDetailProps) {
       </section>
 
       {/* 4b. GALERIA VISUAL DO SERVIÇO */}
-      {service.galleryImages && service.galleryImages.length > 0 && (
+      {galleryImages && galleryImages.length > 0 && (
         <section className="py-20 bg-[#050505] relative overflow-hidden border-t border-[#1a1a1a]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -265,14 +307,14 @@ export function ServiceDetail({ slug, onNavigate }: ServiceDetailProps) {
               <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#050505] to-transparent z-20 pointer-events-none"></div>
               
               <div className="animate-marquee-ltr flex gap-4">
-                {[...service.galleryImages, ...service.galleryImages, ...service.galleryImages].map((imgUrl, idx) => (
+                {[...galleryImages, ...galleryImages].map((imgUrl: any, idx: number) => (
                   <div 
                     key={idx} 
                     className="relative w-[280px] h-[180px] rounded-xl overflow-hidden card-luxury group flex-shrink-0"
                   >
                     <div className="absolute inset-2 border border-[#E2AF55]/10 rounded-lg z-20 pointer-events-none"></div>
                     <img
-                      src={imgUrl.startsWith("http") ? imgUrl : `${import.meta.env.BASE_URL}${imgUrl.replace(/^\//, "")}`}
+                      src={resolveMediaUrl(imgUrl, "")}
                       alt={`Equipamento ${idx + 1}`}
                       className="w-full h-full object-cover mix-blend-luminosity brightness-75 group-hover:mix-blend-normal transition-all duration-500"
                     />
@@ -284,14 +326,14 @@ export function ServiceDetail({ slug, onNavigate }: ServiceDetailProps) {
 
             {/* Desktop: Grelha padrão */}
             <div className="hidden lg:grid grid-cols-2 lg:grid-cols-3 gap-6">
-              {service.galleryImages.map((imgUrl, idx) => (
+              {galleryImages.map((imgUrl: any, idx: number) => (
                 <div 
                   key={idx} 
                   className="relative h-[260px] rounded-xl overflow-hidden card-luxury group cursor-pointer"
                 >
                   <div className="absolute inset-2 border border-[#E2AF55]/10 group-hover:border-[#E2AF55]/35 rounded-lg z-20 pointer-events-none transition-all duration-500"></div>
                   <img
-                    src={imgUrl.startsWith("http") ? imgUrl : `${import.meta.env.BASE_URL}${imgUrl.replace(/^\//, "")}`}
+                    src={resolveMediaUrl(imgUrl, "")}
                     alt={`Equipamento ou Instalação ${idx + 1} de ${service.title}`}
                     className="w-full h-full object-cover mix-blend-luminosity brightness-75 group-hover:mix-blend-normal group-hover:scale-105 transition-all duration-700 ease-out"
                     loading="lazy"
@@ -330,7 +372,7 @@ export function ServiceDetail({ slug, onNavigate }: ServiceDetailProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {workSteps.map((step, idx) => (
+            {defaultWorkSteps.map((step, idx) => (
               <div
                 key={idx}
                 className="card-luxury p-5 rounded-xl flex flex-col justify-between relative group"

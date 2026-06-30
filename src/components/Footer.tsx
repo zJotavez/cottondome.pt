@@ -1,19 +1,28 @@
 import React from "react";
 import { ChevronRight, Phone, Mail, MapPin } from "lucide-react";
 import { CONTACT_INFO } from "../data";
+import { SiteSettings } from "../types";
 
 interface FooterProps {
   onNavigate: (path: string) => void;
+  settings?: SiteSettings;
 }
 
-export function Footer({ onNavigate }: FooterProps) {
+export function Footer({ onNavigate, settings }: FooterProps) {
   const currentYear = 2026;
 
-  const isPhonePlaceholder = CONTACT_INFO.phone.includes("[");
-  const phoneHref = isPhonePlaceholder ? "#contacto" : `tel:${CONTACT_INFO.phone.replace(/[^\d+]/g, "")}`;
+  const phoneVal = settings?.phone || CONTACT_INFO.phone;
+  const emailVal = settings?.email || CONTACT_INFO.email;
+  const addressVal = settings?.address || CONTACT_INFO.address;
+  const logo = settings?.logo;
 
-  const isEmailPlaceholder = CONTACT_INFO.email.includes("[");
-  const emailHref = isEmailPlaceholder ? "#contacto" : `mailto:${CONTACT_INFO.email}`;
+  const logoSrc = logo && logo !== "" ? (logo.startsWith("http") ? logo : `${import.meta.env.VITE_API_URL || ''}/${logo.replace(/^\//, '')}`) : "/images/logo.png";
+
+  const isPhonePlaceholder = phoneVal.includes("[");
+  const phoneHref = isPhonePlaceholder ? "#contacto" : `tel:${phoneVal.replace(/[^\d+]/g, "")}`;
+
+  const isEmailPlaceholder = emailVal.includes("[");
+  const emailHref = isEmailPlaceholder ? "#contacto" : `mailto:${emailVal}`;
 
   const quickLinks = [
     { label: "Início", href: "#home" },
@@ -56,7 +65,7 @@ export function Footer({ onNavigate }: FooterProps) {
               className="flex items-center gap-2 mb-6 group"
             >
               <img 
-                src="/images/logo.png" 
+                src={logoSrc} 
                 alt="Cotton Dome Logo" 
                 className="w-10 h-10 object-contain" 
               />
@@ -134,7 +143,7 @@ export function Footer({ onNavigate }: FooterProps) {
                   }}
                   className="text-xs text-gray-400 hover:text-white font-mono leading-relaxed"
                 >
-                  {CONTACT_INFO.phone}
+                  {phoneVal}
                 </a>
               </li>
               <li className="flex items-start gap-2.5">
@@ -146,13 +155,13 @@ export function Footer({ onNavigate }: FooterProps) {
                   }}
                   className="text-xs text-gray-400 hover:text-white leading-relaxed"
                 >
-                  {CONTACT_INFO.email}
+                  {emailVal}
                 </a>
               </li>
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[#C28D35] mt-0.5 flex-shrink-0" />
                 <span className="text-xs text-gray-400 leading-relaxed">
-                  {CONTACT_INFO.address}
+                  {addressVal}
                 </span>
               </li>
             </ul>

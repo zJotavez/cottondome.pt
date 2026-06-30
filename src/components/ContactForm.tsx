@@ -2,13 +2,18 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Phone, Mail, MapPin, Send, MessageSquare, Check, AlertCircle } from "lucide-react";
 import { SOLUTIONS, CONTACT_INFO } from "../data";
+import { SiteSettings, DbService } from "../types";
+
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
 interface ContactFormProps {
   selectedService: string;
   onClearService: () => void;
+  settings?: SiteSettings;
+  services?: DbService[];
 }
 
-export function ContactForm({ selectedService, onClearService }: ContactFormProps) {
+export function ContactForm({ selectedService, onClearService, settings, services }: ContactFormProps) {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -44,26 +49,51 @@ export function ContactForm({ selectedService, onClearService }: ContactFormProp
     setErrorMessage("");
     setIsSubmitting(true);
 
-    // Simulate api delivery
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitSuccess(true);
-      // Reset form
-      setFormData({
-        name: "",
-        phone: "",
-        email: "",
-        service: "",
-        message: "",
+    fetch(`${API_BASE}/api/contact.php`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(formData)
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Server error");
+        return res.json();
+      })
+      .then((res) => {
+        setIsSubmitting(false);
+        if (res.success) {
+          setSubmitSuccess(true);
+          setFormData({
+            name: "",
+            phone: "",
+            email: "",
+            service: "",
+            message: "",
+          });
+          onClearService();
+        } else {
+          setErrorMessage(res.error || "Erro ao submeter contacto.");
+        }
+      })
+      .catch((err) => {
+        setIsSubmitting(false);
+        setErrorMessage("Erro ao comunicar com o servidor. Por favor, tente de novo.");
       });
-      onClearService();
-    }, 1500);
   };
+
+  // Resolve contact settings
+  const phoneVal = settings?.phone || CONTACT_INFO.phone;
+  const whatsappVal = settings?.whatsapp || CONTACT_INFO.whatsapp;
+  const emailVal = settings?.email || CONTACT_INFO.email;
+  const addressVal = settings?.address || CONTACT_INFO.address;
+  const hoursWeekVal = settings?.working_hours_week || CONTACT_INFO.workingHoursWeek;
+  const hoursSatVal = settings?.working_hours_sat || CONTACT_INFO.workingHoursSat;
 
   // Generate WhatsApp message URL based on current inputs
   const getWhatsAppUrl = () => {
-    const isPlaceholder = CONTACT_INFO.whatsapp.includes("[");
-    const cleanNumber = isPlaceholder ? "351912345678" : CONTACT_INFO.whatsapp.replace(/[^\d]/g, "");
+    const isPlaceholder = whatsappVal.includes("[");
+    const cleanNumber = isPlaceholder ? "351918880788" : whatsappVal.replace(/[^\d]/g, "");
     const intro = "Olá Cotton Dome, gostaria de solicitar um orçamento para soluções de segurança.";
     const details = formData.name 
       ? `\n\n*Nome:* ${formData.name}${formData.phone ? `\n*Telefone:* ${formData.phone}` : ""}${formData.service ? `\n*Serviço:* ${formData.service}` : ""}${formData.message ? `\n*Mensagem:* ${formData.message}` : ""}`
@@ -72,11 +102,16 @@ export function ContactForm({ selectedService, onClearService }: ContactFormProp
     return `https://api.whatsapp.com/send?phone=${cleanNumber}&text=${encodeURIComponent(intro + details)}`;
   };
 
-  const isPhonePlaceholder = CONTACT_INFO.phone.includes("[");
-  const phoneHref = isPhonePlaceholder ? "#contacto" : `tel:${CONTACT_INFO.phone.replace(/[^\d+]/g, "")}`;
+  const isPhonePlaceholder = phoneVal.includes("[");
+  const phoneHref = isPhonePlaceholder ? "#contacto" : `tel:${phoneVal.replace(/[^\d+]/g, "")}`;
 
-  const isEmailPlaceholder = CONTACT_INFO.email.includes("[");
-  const emailHref = isEmailPlaceholder ? "#contacto" : `mailto:${CONTACT_INFO.email}`;
+  const isEmailPlaceholder = emailVal.includes("[");
+  const emailHref = isEmailPlaceholder ? "#contacto" : `mailto:${emailVal}`;
+
+  // Get active solutions to populate dropdown
+  const dropdownServices = services && services.length > 0 
+    ? services.map(s => ({ id: s.id, title: s.title })) 
+    : SOLUTIONS.map(s => ({ id: s.id, title: s.title }));
 
   return (
     <section id="contacto" className="py-24 bg-[#0a0a0a] relative overflow-hidden border-t border-[#1a1a1a]">
@@ -135,7 +170,7 @@ export function ContactForm({ selectedService, onClearService }: ContactFormProp
                   <div>
                     <span className="block font-display text-[10px] uppercase tracking-wider text-gray-500 font-bold">Telefone</span>
                     <a href={phoneHref} className="block text-sm text-white hover:text-[#E2AF55] font-mono transition-colors mt-0.5">
-                      {CONTACT_INFO.phone}
+                      {phoneVal}
                     </a>
                     <span className="text-[10px] text-gray-500 block mt-0.5">Chamada para a rede móvel nacional</span>
                   </div>
@@ -149,7 +184,7 @@ export function ContactForm({ selectedService, onClearService }: ContactFormProp
                   <div>
                     <span className="block font-display text-[10px] uppercase tracking-wider text-gray-500 font-bold">E-mail</span>
                     <a href={emailHref} className="block text-sm text-white hover:text-[#E2AF55] font-sans transition-colors mt-0.5">
-                      {CONTACT_INFO.email}
+                      {emailVal}
                     </a>
                   </div>
                 </div>
@@ -162,7 +197,7 @@ export function ContactForm({ selectedService, onClearService }: ContactFormProp
                   <div>
                     <span className="block font-display text-[10px] uppercase tracking-wider text-gray-500 font-bold">Localização</span>
                     <span className="block text-sm text-white font-sans mt-0.5">
-                      {CONTACT_INFO.address}
+                      {addressVal}
                     </span>
                     <span className="text-[10px] text-gray-500 block mt-0.5">Atendimento em todo o Norte e Centro de Portugal</span>
                   </div>
@@ -176,8 +211,8 @@ export function ContactForm({ selectedService, onClearService }: ContactFormProp
                 DISPONIBILIDADE
               </span>
               <span className="block text-xs text-[#D9D9D9] font-sans leading-relaxed">
-                {CONTACT_INFO.workingHoursWeek}<br />
-                {CONTACT_INFO.workingHoursSat}
+                {hoursWeekVal}<br />
+                {hoursSatVal}
               </span>
             </div>
           </div>
@@ -268,7 +303,7 @@ export function ContactForm({ selectedService, onClearService }: ContactFormProp
                         className="w-full bg-[#161616] border border-[#222222] focus:border-[#E2AF55] focus:shadow-[0_0_10px_rgba(226,175,85,0.15)] rounded px-4 py-3 text-xs font-sans text-white focus:outline-none transition-all appearance-none"
                       >
                         <option value="">-- Selecione uma solução --</option>
-                        {SOLUTIONS.map((sol) => (
+                        {dropdownServices.map((sol) => (
                           <option key={sol.id} value={sol.title}>
                             {sol.title}
                           </option>

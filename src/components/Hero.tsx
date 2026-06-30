@@ -1,13 +1,32 @@
 import React from "react";
 import { motion } from "motion/react";
 import { ArrowRight, Eye, Key, Cpu, Sparkles } from "lucide-react";
+import { HomeContent } from "../types";
+
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
 interface HeroProps {
   onQuoteClick: () => void;
   onExploreClick: () => void;
+  content?: HomeContent;
 }
 
-export function Hero({ onQuoteClick, onExploreClick }: HeroProps) {
+export function Hero({ onQuoteClick, onExploreClick, content }: HeroProps) {
+  // Resolve media URLs
+  const resolveMediaUrl = (url: string | undefined, defaultUrl: string) => {
+    if (!url) return defaultUrl;
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+      return url;
+    }
+    return `${API_BASE}/${url}`;
+  };
+
+  const heroTitle = content?.hero_title || "Segurança Inteligente para Residências, Empresas e Condomínios";
+  const heroSubtitle = content?.hero_subtitle || "A Cotton Dome LDA desenvolve soluções completas em videovigilância, controlo de acessos, intrusão, automatismos, redes, telecomunicações e sistemas de proteção profissional.";
+  const videoSource = resolveMediaUrl(content?.hero_video, `${import.meta.env.BASE_URL}videos/hero-video.mp4`);
+  const primaryBtnText = content?.primary_button_text || "Solicitar Orçamento";
+  const secondaryBtnText = content?.secondary_button_text || "Conhecer Soluções";
+
   return (
     <section
       id="home"
@@ -19,9 +38,10 @@ export function Hero({ onQuoteClick, onExploreClick }: HeroProps) {
         loop
         muted
         playsInline
+        key={videoSource} // Force reload video when source changes
         className="absolute inset-0 w-full h-full object-cover"
       >
-        <source src={`${import.meta.env.BASE_URL}videos/hero-video.mp4`} type="video/mp4" />
+        <source src={videoSource} type="video/mp4" />
       </video>
 
       {/* Tech Grid Overlay on top of video */}
@@ -58,7 +78,15 @@ export function Hero({ onQuoteClick, onExploreClick }: HeroProps) {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.05] tracking-tight mb-6 uppercase"
             >
-              Segurança <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C28D35] via-[#E2AF55] to-[#A37125] filter drop-shadow-[0_2px_10px_rgba(226,175,85,0.2)]">Inteligente</span> para Residências, Empresas e Condomínios
+              {heroTitle.includes("Inteligente") ? (
+                <span>
+                  {heroTitle.split("Inteligente")[0]}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C28D35] via-[#E2AF55] to-[#A37125] filter drop-shadow-[0_2px_10px_rgba(226,175,85,0.2)]">Inteligente</span>
+                  {heroTitle.split("Inteligente")[1]}
+                </span>
+              ) : (
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C28D35] via-[#E2AF55] to-[#A37125] filter drop-shadow-[0_2px_10px_rgba(226,175,85,0.2)]">{heroTitle}</span>
+              )}
             </motion.h1>
 
             <motion.p
@@ -67,7 +95,18 @@ export function Hero({ onQuoteClick, onExploreClick }: HeroProps) {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-base sm:text-lg text-[#D9D9D9] max-w-xl leading-relaxed mb-8 font-sans"
             >
-              A <strong className="text-white font-semibold">Cotton Dome LDA</strong> desenvolve soluções completas em videovigilância, controlo de acessos, intrusão, automatismos, redes, telecomunicações e sistemas de proteção profissional.
+              {heroSubtitle.includes("Cotton Dome LDA") ? (
+                <span>
+                  {heroSubtitle.split("Cotton Dome").map((chunk, i) => (
+                    <React.Fragment key={i}>
+                      {i > 0 && <strong className="text-white font-semibold">Cotton Dome</strong>}
+                      {chunk}
+                    </React.Fragment>
+                  ))}
+                </span>
+              ) : (
+                <span>{heroSubtitle}</span>
+              )}
             </motion.p>
 
             <motion.div
@@ -80,16 +119,17 @@ export function Hero({ onQuoteClick, onExploreClick }: HeroProps) {
                 onClick={onQuoteClick}
                 className="px-8 py-4 btn-gold-premium font-bold uppercase tracking-widest text-xs rounded cursor-pointer"
               >
-                Solicitar Orçamento
+                {primaryBtnText}
               </button>
 
               <button
                 onClick={onExploreClick}
                 className="px-8 py-4 btn-gold-outline font-bold uppercase tracking-widest text-xs rounded cursor-pointer"
               >
-                Conhecer Soluções
+                {secondaryBtnText}
               </button>
             </motion.div>
+
 
             {/* Extra Trust Badges */}
             <motion.div
