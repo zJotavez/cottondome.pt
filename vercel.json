@@ -3,29 +3,7 @@
   "buildCommand": "npx vite build",
   "outputDirectory": "dist",
   "framework": null,
-  "functions": {
-    "api/**/*.php": {
-      "runtime": "vercel-php@0.7.3",
-      "excludeFiles": [
-        "node_modules/**",
-        "src/**",
-        "public/**",
-        "dist/**",
-        "images/**",
-        "videos/**",
-        "uploads/**",
-        "assets/**",
-        ".git/**",
-        "cotton-dome-site.zip",
-        "database.sql"
-      ]
-    }
-  },
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
-    },
     {
       "source": "/assets/(.*)",
       "destination": "/assets/$1"
