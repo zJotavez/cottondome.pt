@@ -1,0 +1,15 @@
+# Exclude local node_modules
+node_modules
+
+# Exclude large backup files and SQL files
+cotton-dome-site.zip
+database.sql
+
+# Exclude local images/videos folder used for backups
+images/
+videos/
+uploads/
+
+# Exclude Git folders
+.git
+.github

@@ -5,7 +5,20 @@
   "framework": null,
   "functions": {
     "api/**/*.php": {
-      "runtime": "vercel-php@0.7.3"
+      "runtime": "vercel-php@0.7.3",
+      "excludeFiles": [
+        "node_modules/**",
+        "src/**",
+        "public/**",
+        "dist/**",
+        "images/**",
+        "videos/**",
+        "uploads/**",
+        "assets/**",
+        ".git/**",
+        "cotton-dome-site.zip",
+        "database.sql"
+      ]
     }
   },
   "rewrites": [
