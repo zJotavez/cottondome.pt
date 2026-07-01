@@ -4,7 +4,7 @@ import { ChevronDown } from "lucide-react";
 
 // Inline Flag SVGs to render correctly on all OS (including Windows)
 const FlagPT = () => (
-  <svg viewBox="0 0 600 400" className="w-5 h-3.5 rounded-sm object-cover shadow-sm flex-shrink-0">
+  <svg viewBox="0 0 600 400" className="w-4 h-2.5 md:w-5 md:h-3.5 rounded-sm object-cover shadow-sm flex-shrink-0">
     <rect width="240" height="400" fill="#006600" />
     <rect x="240" width="360" height="400" fill="#FF0000" />
     {/* Coat of arms simplified */}
@@ -15,7 +15,7 @@ const FlagPT = () => (
 );
 
 const FlagGB = () => (
-  <svg viewBox="0 0 60 30" className="w-5 h-3.5 rounded-sm object-cover shadow-sm flex-shrink-0">
+  <svg viewBox="0 0 60 30" className="w-4 h-2.5 md:w-5 md:h-3.5 rounded-sm object-cover shadow-sm flex-shrink-0">
     <rect width="60" height="30" fill="#012169" />
     <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" />
     <path d="M0,0 L60,30 M60,0 L0,30" stroke="#c8102e" strokeWidth="3.5" />
@@ -25,7 +25,7 @@ const FlagGB = () => (
 );
 
 const FlagFR = () => (
-  <svg viewBox="0 0 3 2" className="w-5 h-3.5 rounded-sm object-cover shadow-sm flex-shrink-0">
+  <svg viewBox="0 0 3 2" className="w-4 h-2.5 md:w-5 md:h-3.5 rounded-sm object-cover shadow-sm flex-shrink-0">
     <rect width="1" height="2" fill="#00209F" />
     <rect x="1" width="1" height="2" fill="#FFFFFF" />
     <rect x="2" width="1" height="2" fill="#F6424D" />
@@ -61,15 +61,15 @@ export function LanguageSelector({ currentLang, onLangChange }: LanguageSelector
   const activeLang = languages.find((lang) => lang.code === currentLang) || languages[0];
 
   return (
-    <div ref={containerRef} className="fixed top-[22px] right-[76px] md:top-6 md:right-6 z-50">
+    <div ref={containerRef} className="fixed top-[26px] right-[58px] md:top-6 md:right-6 z-50">
       <div className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Alterar Idioma / Change Language"
-          className="flex items-center gap-2 px-3 py-2.5 rounded-full bg-[#111111]/90 border border-white/10 hover:border-[#E2AF55] text-white hover:text-[#E2AF55] shadow-lg shadow-black/60 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md"
+          className="flex items-center gap-1.5 md:gap-2 px-2 py-1.5 md:px-3 md:py-2.5 rounded-full bg-[#111111]/90 border border-white/10 hover:border-[#E2AF55] text-white hover:text-[#E2AF55] shadow-lg shadow-black/60 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md"
         >
           {activeLang.flag}
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+          <ChevronDown className={`w-3 h-3 md:w-3.5 md:h-3.5 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
         </button>
 
         <AnimatePresence>
