@@ -1,6 +1,5 @@
 node_modules/
 build/
-dist/
 coverage/
 .DS_Store
 *.log
@@ -8,3 +7,6 @@ coverage/
 
 # Database credentials
 api/db_config.php
+
+# Scratch/temp files
+scratch/
