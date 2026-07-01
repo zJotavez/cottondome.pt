@@ -4,8 +4,7 @@ import { Phone, Mail, MapPin, Send, MessageSquare, Check, AlertCircle } from "lu
 import { SOLUTIONS, CONTACT_INFO } from "../data";
 import { SiteSettings, DbService } from "../types";
 import { TRANSLATIONS } from "../translations";
-
-const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+import { submitContactMessage } from "../lib/database";
 
 interface ContactFormProps {
   selectedService: string;
@@ -53,34 +52,14 @@ export function ContactForm({ selectedService, onClearService, settings, service
     setErrorMessage("");
     setIsSubmitting(true);
 
-    fetch(`${API_BASE}/api/contact.php`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(formData)
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Server error");
-        return res.json();
-      })
-      .then((res) => {
+    submitContactMessage(formData)
+      .then(() => {
         setIsSubmitting(false);
-        if (res.success) {
-          setSubmitSuccess(true);
-          setFormData({
-            name: "",
-            phone: "",
-            email: "",
-            service: "",
-            message: "",
-          });
-          onClearService();
-        } else {
-          setErrorMessage(res.error || t.contact.form.sendError);
-        }
+        setSubmitSuccess(true);
+        setFormData({ name: "", phone: "", email: "", service: "", message: "" });
+        onClearService();
       })
-      .catch((err) => {
+      .catch(() => {
         setIsSubmitting(false);
         setErrorMessage(t.contact.form.sendError);
       });

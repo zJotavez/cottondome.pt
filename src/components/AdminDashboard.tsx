@@ -6,9 +6,24 @@ import {
   ChevronRight, Menu, HelpCircle, Phone, Mail, MapPin, ExternalLink
 } from "lucide-react";
 import { LucideIcon } from "./LucideIcon";
-
-// Configuration for API URL. Uses VITE_API_URL if set, otherwise empty for relative path
-const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+import { supabase } from "../lib/supabase";
+import {
+  getSiteContent,
+  getMessages,
+  getMediaList,
+  updateMessageStatus,
+  deleteMessage,
+  uploadMedia,
+  deleteMedia,
+  saveSettings,
+  saveHome,
+  saveAbout,
+  saveService,
+  saveServicePage,
+  saveSupplier,
+  saveGallery,
+  saveSeo,
+} from "../lib/database";
 
 interface AdminDashboardProps {
   onNavigate: (path: string) => void;
@@ -74,11 +89,18 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const fetchAllData = async () => {
     setDataLoading(true);
     try {
-      // 1. Fetch site content
-      const resContent = await fetch(`${API_BASE}/api/get_content.php`);
-      const contentData = await resContent.json();
-      if (contentData.success) {
-        const d = contentData.data;
+      // 1. Check Supabase Auth session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setIsLoggedIn(false);
+        setDataLoading(false);
+        return;
+      }
+
+      // 2. Fetch site content
+      const contentRes = await getSiteContent();
+      if (contentRes.success && contentRes.data) {
+        const d = contentRes.data;
         setSiteData(d);
         setSettingsForm(d.settings || {});
         setHomeForm(d.home || {});
@@ -88,43 +110,49 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         setGalleryList(d.gallery || []);
         setSeoList(d.seo || []);
         
-        // Auto select first service for page detail editor
         if (d.services && d.services.length > 0) {
           handleSelectService(d.services[0].id, d.service_pages, d.services[0]);
         }
       }
 
-      // 2. Fetch admin data (messages & media)
-      const resMsg = await fetch(`${API_BASE}/api/admin/messages.php`);
-      if (resMsg.status === 401) {
-        setIsLoggedIn(false);
-        setDataLoading(false);
-        return;
-      }
-      const msgData = await resMsg.json();
-      if (msgData.success) {
-        setMessages(msgData.data || []);
-      }
-
-      const resMedia = await fetch(`${API_BASE}/api/admin/media.php`);
-      const mediaData = await resMedia.json();
-      if (mediaData.success) {
-        setMediaList(mediaData.data || []);
-      }
+      // 3. Fetch messages & media
+      const [msgs, media] = await Promise.all([getMessages(), getMediaList()]);
+      setMessages(msgs);
+      setMediaList(media);
 
       setIsLoggedIn(true);
     } catch (err) {
       console.error("Error fetching admin data", err);
-      // If unauthorized, set logged out
       setIsLoggedIn(false);
     } finally {
       setDataLoading(false);
     }
   };
 
-  // Check login status on mount
+  // Check login status on mount (listen to Supabase Auth changes)
   useEffect(() => {
-    fetchAllData();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        fetchAllData();
+      } else {
+        setIsLoggedIn(false);
+        setIsLoggedIn(prevState => {
+          if (prevState === null) setTimeout(() => setIsLoggedIn(false), 0);
+          return prevState;
+        });
+      }
+    });
+
+    // Initial check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        fetchAllData();
+      } else {
+        setIsLoggedIn(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   // Alert handler
@@ -133,7 +161,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     setTimeout(() => setAlert(null), 5000);
   };
 
-  // Handles Login
+  // Handles Login via Supabase Auth
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!usernameInput || !passwordInput) {
@@ -144,18 +172,15 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     setAuthError("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/login.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: usernameInput, password: passwordInput })
+      const { error } = await supabase.auth.signInWithPassword({
+        email: usernameInput,
+        password: passwordInput,
       });
-      const data = await res.json();
-      if (data.success) {
-        setIsLoggedIn(true);
+      if (error) {
+        setAuthError("E-mail ou palavra-passe incorretos.");
+      } else {
         showAlert("success", "Autenticação efetuada com sucesso!");
         fetchAllData();
-      } else {
-        setAuthError(data.error || "Nome de utilizador ou palavra-passe incorreta.");
       }
     } catch (err) {
       setAuthError("Erro de ligação ao servidor. Tente novamente.");
@@ -164,11 +189,9 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     }
   };
 
-  // Handles Logout
+  // Handles Logout via Supabase Auth
   const handleLogout = async () => {
-    try {
-      await fetch(`${API_BASE}/api/logout.php`);
-    } catch (e) {}
+    await supabase.auth.signOut();
     setIsLoggedIn(false);
     onNavigate("/");
   };
@@ -202,104 +225,75 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     }
   };
 
-  // Form submission helpers
-  const saveSection = async (endpoint: string, payload: any) => {
-    setActionLoading(endpoint);
+  // Generic save helper using Supabase database functions
+  const runSave = async (label: string, fn: () => Promise<void>) => {
+    setActionLoading(label);
     try {
-      const res = await fetch(`${API_BASE}/api/admin/${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.success) {
-        showAlert("success", data.message || "Dados gravados com sucesso!");
-        // Refresh
-        fetchAllData();
-      } else {
-        showAlert("error", data.error || "Falha ao gravar dados.");
-      }
-    } catch (err) {
-      showAlert("error", "Erro ao comunicar com o servidor.");
+      await fn();
+      showAlert("success", "Dados gravados com sucesso!");
+      fetchAllData();
+    } catch (err: any) {
+      showAlert("error", err?.message || "Falha ao gravar dados.");
     } finally {
       setActionLoading(null);
     }
   };
 
   // Save Settings
-  const handleSaveSettings = () => {
-    saveSection("save_settings.php", settingsForm);
-  };
+  const handleSaveSettings = () => runSave("settings", () => saveSettings(settingsForm));
 
   // Save Home
-  const handleSaveHome = () => {
-    saveSection("save_home.php", homeForm);
-  };
+  const handleSaveHome = () => runSave("home", () => saveHome(homeForm));
 
   // Save About
-  const handleSaveAbout = () => {
-    saveSection("save_about.php", aboutForm);
-  };
+  const handleSaveAbout = () => runSave("about", () => saveAbout(aboutForm));
 
   // Save Service General properties
-  const handleSaveServiceGeneral = (service: any) => {
-    saveSection("save_services.php", service);
-  };
+  const handleSaveServiceGeneral = (service: any) => runSave("service", () => saveService(service));
 
   // Save Service Subpage Detail
-  const handleSaveServicePage = () => {
-    saveSection("save_service_page.php", servicePageForm);
-  };
+  const handleSaveServicePage = () => runSave("service_page", () => saveServicePage(servicePageForm));
 
   // Save Supplier
   const handleSaveSupplier = () => {
-    saveSection("save_suppliers.php", { ...editingSupplier, action: "save" });
+    runSave("supplier", () => saveSupplier({ ...editingSupplier, action: "save" }));
     setEditingSupplier(null);
   };
 
   // Delete Supplier
   const handleDeleteSupplier = (id: number) => {
     if (confirm("Tem a certeza que deseja remover este fornecedor?")) {
-      saveSection("save_suppliers.php", { id, action: "delete" });
+      runSave("supplier", () => saveSupplier({ id, action: "delete" }));
     }
   };
 
   // Save Gallery
   const handleSaveGallery = () => {
-    saveSection("save_gallery.php", { ...editingGallery, action: "save" });
+    runSave("gallery", () => saveGallery({ ...editingGallery, action: "save" }));
     setEditingGallery(null);
   };
 
   // Delete Gallery
   const handleDeleteGallery = (id: number) => {
     if (confirm("Tem a certeza que deseja remover este item da galeria?")) {
-      saveSection("save_gallery.php", { id, action: "delete" });
+      runSave("gallery", () => saveGallery({ id, action: "delete" }));
     }
   };
 
   // Save SEO Page settings
   const handleSaveSeo = () => {
-    saveSection("save_seo.php", editingSeo);
+    runSave("seo", () => saveSeo(editingSeo));
     setEditingSeo(null);
   };
 
   // Update contact message status
   const handleUpdateMessageStatus = async (id: number, status: string) => {
     try {
-      const res = await fetch(`${API_BASE}/api/admin/messages.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status })
-      });
-      const data = await res.json();
-      if (data.success) {
-        showAlert("success", "Estado da mensagem atualizado.");
-        fetchAllData();
-      } else {
-        showAlert("error", data.error);
-      }
-    } catch (e) {
-      showAlert("error", "Erro ao ligar ao servidor.");
+      await updateMessageStatus(id, status);
+      showAlert("success", "Estado da mensagem atualizado.");
+      fetchAllData();
+    } catch (e: any) {
+      showAlert("error", e?.message || "Erro ao atualizar mensagem.");
     }
   };
 
@@ -307,80 +301,50 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const handleDeleteMessage = async (id: number) => {
     if (confirm("Eliminar definitivamente esta mensagem?")) {
       try {
-        const res = await fetch(`${API_BASE}/api/admin/messages.php`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, action: "delete" })
-        });
-        const data = await res.json();
-        if (data.success) {
-          showAlert("success", "Mensagem eliminada.");
-          fetchAllData();
-        } else {
-          showAlert("error", data.error);
-        }
-      } catch (e) {
-        showAlert("error", "Erro ao ligar ao servidor.");
+        await deleteMessage(id);
+        showAlert("success", "Mensagem eliminada.");
+        fetchAllData();
+      } catch (e: any) {
+        showAlert("error", e?.message || "Erro ao eliminar mensagem.");
       }
     }
   };
 
-  // Handle custom file upload in Media Library
+  // Handle file upload via Supabase Storage
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    
     const file = files[0];
-    const formData = new FormData();
-    formData.append("file", file);
-    
     setUploadProgress("Carregando...");
     try {
-      const res = await fetch(`${API_BASE}/api/admin/upload.php`, {
-        method: "POST",
-        body: formData
-      });
-      const data = await res.json();
-      if (data.success) {
-        showAlert("success", "Ficheiro carregado com sucesso!");
-        fetchAllData();
-      } else {
-        showAlert("error", data.error || "Erro ao carregar ficheiro.");
-      }
-    } catch (err) {
-      showAlert("error", "Erro ao comunicar com o servidor.");
+      await uploadMedia(file);
+      showAlert("success", "Ficheiro carregado com sucesso!");
+      fetchAllData();
+    } catch (err: any) {
+      showAlert("error", err?.message || "Erro ao carregar ficheiro.");
     } finally {
       setUploadProgress(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
-  // Delete media item
-  const handleDeleteMedia = async (id: number) => {
+  // Delete media from Supabase Storage
+  const handleDeleteMedia = async (fileNameOrId: any) => {
     if (confirm("Eliminar fisicamente este ficheiro? Se estiver a ser usado no site, o link será quebrado.")) {
       try {
-        const res = await fetch(`${API_BASE}/api/admin/media.php`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, action: "delete" })
-        });
-        const data = await res.json();
-        if (data.success) {
-          showAlert("success", "Ficheiro eliminado.");
-          fetchAllData();
-        } else {
-          showAlert("error", data.error);
-        }
-      } catch (e) {
-        showAlert("error", "Erro ao ligar ao servidor.");
+        await deleteMedia(fileNameOrId);
+        showAlert("success", "Ficheiro eliminado.");
+        fetchAllData();
+      } catch (e: any) {
+        showAlert("error", e?.message || "Erro ao eliminar ficheiro.");
       }
     }
   };
 
-  // Save administrator password update
+  // Save administrator password update via Supabase Auth
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentPassword || !newPassword || !confirmPassword) {
+    if (!newPassword || !confirmPassword) {
       showAlert("error", "Por favor preencha todos os campos.");
       return;
     }
@@ -391,27 +355,19 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     
     setActionLoading("password");
     try {
-      const res = await fetch(`${API_BASE}/api/admin/change_password.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "change_password",
-          username: newUsername || null,
-          current_password: currentPassword,
-          new_password: newPassword
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
+      const updatePayload: any = { password: newPassword };
+      if (newUsername) updatePayload.email = newUsername;
+      const { error } = await supabase.auth.updateUser(updatePayload);
+      if (error) {
+        showAlert("error", error.message || "Erro ao atualizar credenciais.");
+      } else {
         showAlert("success", "Credenciais de administrador atualizadas com sucesso!");
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
         setNewUsername("");
-      } else {
-        showAlert("error", data.error || "Senha atual incorreta.");
       }
-    } catch (err) {
+    } catch (err: any) {
       showAlert("error", "Erro ao comunicar com o servidor.");
     } finally {
       setActionLoading(null);
@@ -499,13 +455,13 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-xs uppercase tracking-widest text-gray-400 font-mono mb-2">Utilizador</label>
+              <label className="block text-xs uppercase tracking-widest text-gray-400 font-mono mb-2">E-mail de Administrador</label>
               <input
-                type="text"
+                type="email"
                 value={usernameInput}
                 onChange={(e) => setUsernameInput(e.target.value)}
                 className="w-full bg-black border border-gray-800 focus:border-[#C28D35] focus:outline-none px-4 py-3 rounded text-sm text-white font-mono transition duration-300"
-                placeholder="admin"
+                placeholder="admin@domme.pt"
                 required
               />
             </div>

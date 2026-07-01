@@ -17,8 +17,7 @@ import { LanguageSelector } from "./components/LanguageSelector";
 import { ChatBot } from "./components/ChatBot";
 import { TRANSLATIONS } from "./translations";
 import { CONTACT_INFO } from "./data";
-
-const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+import { getSiteContent } from "./lib/database";
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
@@ -34,15 +33,11 @@ export default function App() {
     localStorage.setItem("cotton-dome-lang", lang);
   };
 
-  // Load site settings and content from the database
+  // Load site content from Supabase
   useEffect(() => {
-    fetch(`${API_BASE}/api/get_content.php`)
+    getSiteContent()
       .then((res) => {
-        if (!res.ok) throw new Error("Database not seeded or offline");
-        return res.json();
-      })
-      .then((res) => {
-        if (res.success) {
+        if (res.success && res.data) {
           setDbData(res.data);
         }
       })
