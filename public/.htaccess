@@ -20,7 +20,8 @@ DirectoryIndex index.html
   RewriteRule ^ - [L]
 
   # For everything else (including /admin, /servicos/*), serve index.html
-  # This allows React Router to handle the routing client-side
+  # Do NOT rewrite /api/ requests (let them return normal 404/500 if files don't exist)
+  RewriteCond %{REQUEST_URI} !^/api/
   RewriteRule ^ index.html [L]
 </IfModule>
 

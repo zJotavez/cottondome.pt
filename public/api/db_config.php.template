@@ -1,0 +1,11 @@
+<?php
+/**
+ * Cotton Dome LDA - Database Production Configuration
+ * Copy this file to "db_config.php" and fill in your Hostinger database details.
+ * Do not commit "db_config.php" to Git.
+ */
+
+define('DB_HOST', 'localhost');             // Database host (usually localhost or mysql.hostinger.com)
+define('DB_NAME', 'u123456789_cotton_dome'); // Database name created in Hostinger panel
+define('DB_USER', 'u123456789_admin');       // Database user created in Hostinger panel
+define('DB_PASS', 'SuaSenhaSeguraAqui');     // Database user password
