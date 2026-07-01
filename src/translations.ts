@@ -365,21 +365,21 @@ export const TRANSLATIONS: Record<"pt" | "en" | "fr", TranslationDictionary> = {
     services: {
       "cctv": {
         title: "CCTV / Videovigilância Profissional",
-        slogan: "Monitorização inteligente e controlo total em tempo real para a máxima segurança do seu património.",
-        shortDesc: "Sistemas de câmaras de alta definição com inteligência artificial para monitorização e gravação local e remota.",
-        desc: "Projetamos e instalamos sistemas de videovigilância (CCTV) profissionais com câmaras de alta definição (IP e Analógicas) que incorporam inteligência artificial para deteção precisa de humanos e veículos. Monitorize o seu espaço a partir de qualquer parte do mundo através de dispositivos móveis, com gravação contínua e segura e soluções sob medida para residências, condomínios e setores corporativos."
+        slogan: "Vigilância inteligente 24/7 com câmeras HD e IA para proteger o que mais importa.",
+        shortDesc: "Câmeras IP e analógicas HD com IA, gravação contínua e monitorização remota em tempo real via app.",
+        desc: "A Cotton Dome LDA projeta e instala sistemas de videovigilância profissionais com câmeras IP e analógicas de alta definição que incorporam IA para deteção precisa de pessoas e veículos. Monitorize o seu espaço de qualquer ponto do mundo em tempo real, com gravação segura, alertas automáticos por movimento e acesso via smartphone."
       },
       "intrusao": {
         title: "Sistemas de Alarme e Intrusão",
-        slogan: "Sistemas inteligentes de deteção de intrusão com resposta rápida e alertas imediatos no seu telemóvel.",
-        shortDesc: "Proteção perimetral e interna com sensores de movimento avançados, sirenes de alta potência e centrais conectadas.",
-        desc: "Os nossos sistemas de intrusão oferecem uma barreira de segurança ativa e inteligente. Com centrais avançadas com ou sem fios, detetores de movimento imunes a animais de estimação, sensores magnéticos e proteção perimetral exterior, garantimos deteção precoce de invasões com notificação direta na aplicação móvel ou ligação a centrais de receção de alarmes."
+        slogan: "Proteção inteligente contra invasões com alertas instantâneos e resposta imediata no seu telemóvel.",
+        shortDesc: "Centrais de alarme conectadas, sensores PIR avançados, sirenes de alto impacto e proteção perimetral 24/7.",
+        desc: "Os nossos sistemas de alarme e intrusão criam uma barreira de segurança ativa em torno do seu espaço. Detetores PIR imunes a animais de estimação, sensores magnéticos, barreiras perimetrais e centrais GSM/Wi-Fi garantem alerta imediato no seu telemóvel — com opção de ligação a central de monitorização profissional."
       },
       "acessos": {
         title: "Controlo de Acessos",
-        slogan: "Gestão inteligente de fluxos de pessoas e permissões com reconhecimento facial, biometria e tags RFID.",
-        shortDesc: "Leitores inteligentes, fechaduras eletrónicas e torniquetes para garantir que apenas pessoas autorizadas acedem ao seu espaço.",
-        desc: "Fornecemos e instalamos sistemas avançados de controlo de acessos residenciais e corporativos. Permita a entrada controlada de funcionários, visitantes ou residentes com leitores de impressão digital, reconhecimento facial em frações de segundo, tags, cartões de proximidade ou códigos numéricos, mantendo um registo histórico em tempo real e integração com alarmes e CCTV."
+        slogan: "Segurança máxima em cada entrada: apenas pessoas autorizadas acedem ao seu espaço.",
+        shortDesc: "Biometria, reconhecimento facial, RFID e fechaduras eletrónicas para controlo total de acessos.",
+        desc: "A Cotton Dome LDA fornece e instala sistemas avançados de controlo de acessos para empresas, condomínios e indústrias. Controle quem entra, quando e por onde — com reconhecimento facial, biometria, cartões RFID e fechaduras eletrónicas. Todos os acessos ficam registados em tempo real, com histórico completo e integração com CCTV e alarme."
       },
       "incendio": {
         title: "Sistemas de Deteção de Incêndio",

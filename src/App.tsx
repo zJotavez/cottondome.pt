@@ -15,6 +15,7 @@ import { ServiceDetail } from "./components/ServiceDetail";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { LanguageSelector } from "./components/LanguageSelector";
 import { Equipments } from "./components/Equipments";
+import { ChatBot } from "./components/ChatBot";
 import { TRANSLATIONS } from "./translations";
 import { CONTACT_INFO } from "./data";
 
@@ -336,6 +337,9 @@ export default function App() {
 
       {/* Language Selector Button */}
       <LanguageSelector currentLang={language} onLangChange={handleLangChange} />
+
+      {/* AI ChatBot Assistant */}
+      <ChatBot lang={language} />
 
       {/* Floating WhatsApp Button */}
       <a
