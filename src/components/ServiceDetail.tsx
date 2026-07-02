@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { SERVICES_DATA } from "../servicesData";
 import { ENVIRONMENTS } from "../data";
 import { LucideIcon } from "./LucideIcon";
-import { ArrowLeft, CheckCircle2, ShieldCheck, HelpCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ShieldCheck, HelpCircle, MessageSquare, ShoppingCart } from "lucide-react";
 import { motion } from "motion/react";
 import { DbService, DbServicePage } from "../types";
 import { TRANSLATIONS } from "../translations";
@@ -35,6 +35,208 @@ const mapIdToKey = (id: string | number): "residencias" | "condominios" | "empre
   };
   return map[id] || "residencias";
 };
+
+// ============================================================
+// DADOS DOS PRODUTOS AJAX PARA INTRUSÃO E SISTEMA DE ALARME
+// ============================================================
+const AJAX_PRODUCTS = [
+  {
+    id: "aj-combiprotect-s-w",
+    category: { pt: "Sensor de Movimento e Quebra de Vidro", en: "Motion & Glass Break Sensor", fr: "Capteur de Mouvement et Bris de Verre" },
+    name: "AJ-COMBIPROTECT-S-W",
+    image: "/images/ajax-combiprotect-s-w.jpg",
+    badge: "AJAX",
+    description: {
+      pt: "Detector sem fio que combina sensor de movimento e sensor acústico de quebra de vidro, oferecendo dupla proteção para ambientes internos com alta precisão.",
+      en: "Wireless detector combining motion sensor and acoustic glass break sensor, providing dual protection for indoor environments with high precision.",
+      fr: "Détecteur sans fil combinant capteur de mouvement et capteur acoustique de bris de verre, offrant une double protection pour les environnements intérieurs.",
+    },
+    benefits: {
+      pt: [
+        "Detecta movimento em ambientes internos",
+        "Identifica quebra de vidro com alta precisão",
+        "Tecnologia sem fio",
+        "Ideal para residências, escritórios e lojas",
+        "Reduz falsos alarmes",
+        "Integração com sistema Ajax",
+        "Design moderno e discreto",
+      ],
+      en: [
+        "Detects motion in indoor environments",
+        "Identifies glass break with high precision",
+        "Wireless technology",
+        "Ideal for homes, offices, and stores",
+        "Reduces false alarms",
+        "Ajax system integration",
+        "Modern and discreet design",
+      ],
+      fr: [
+        "Détecte les mouvements en intérieur",
+        "Identifie le bris de verre avec haute précision",
+        "Technologie sans fil",
+        "Idéal pour les résidences, bureaux et commerces",
+        "Réduit les fausses alarmes",
+        "Intégration avec le système Ajax",
+        "Design moderne et discret",
+      ],
+    },
+    application: {
+      pt: "Indicado para proteção de salas, recepções, corredores, escritórios, lojas e ambientes comerciais e residenciais que precisam de monitoramento interno eficiente.",
+      en: "Recommended for the protection of rooms, receptions, corridors, offices, stores, and commercial or residential environments that need efficient indoor monitoring.",
+      fr: "Recommandé pour la protection des salles, réceptions, couloirs, bureaux, magasins et environnements commerciaux ou résidentiels nécessitant une surveillance intérieure efficace.",
+    },
+  },
+  {
+    id: "aj-curtainoutdoor-w",
+    category: { pt: "Sensor Cortina Externo", en: "Outdoor Curtain Sensor", fr: "Capteur Rideau Extérieur" },
+    name: "AJ-CURTAINOUTDOOR-W",
+    image: "/images/ajax-curtainoutdoor-w.jpg",
+    badge: "AJAX",
+    description: {
+      pt: "Detector externo tipo cortina, desenvolvido para proteção perimetral de portas, janelas, fachadas e corredores, criando uma barreira invisível contra invasões.",
+      en: "Outdoor curtain-type detector designed for perimeter protection of doors, windows, facades, and corridors, creating an invisible barrier against intrusions.",
+      fr: "Détecteur extérieur de type rideau conçu pour la protection périmétrique des portes, fenêtres, façades et couloirs, créant une barrière invisible contre les intrusions.",
+    },
+    benefits: {
+      pt: [
+        "Proteção perimetral externa",
+        "Ideal para portas, janelas e fachadas",
+        "Tecnologia sem fio",
+        "Alta resistência para uso externo",
+        "Detecção precisa em formato de cortina",
+        "Redução de falsos alarmes",
+        "Integração com sistemas Ajax",
+        "Design discreto e profissional",
+      ],
+      en: [
+        "External perimeter protection",
+        "Ideal for doors, windows, and facades",
+        "Wireless technology",
+        "High resistance for outdoor use",
+        "Precise curtain-format detection",
+        "False alarm reduction",
+        "Ajax system integration",
+        "Discreet and professional design",
+      ],
+      fr: [
+        "Protection périmétrique externe",
+        "Idéal pour portes, fenêtres et façades",
+        "Technologie sans fil",
+        "Haute résistance pour usage extérieur",
+        "Détection précise en format rideau",
+        "Réduction des fausses alarmes",
+        "Intégration avec les systèmes Ajax",
+        "Design discret et professionnel",
+      ],
+    },
+    application: {
+      pt: "Indicado para áreas externas, muros, varandas, corredores laterais, fachadas comerciais, entradas residenciais e pontos vulneráveis de acesso.",
+      en: "Recommended for outdoor areas, walls, balconies, side corridors, commercial facades, residential entrances, and vulnerable access points.",
+      fr: "Recommandé pour les zones extérieures, murs, balcons, couloirs latéraux, façades commerciales, entrées résidentielles et points d'accès vulnérables.",
+    },
+  },
+  {
+    id: "aj-hub-b",
+    category: { pt: "Central de Alarme Inteligente", en: "Smart Alarm Hub", fr: "Centrale d'Alarme Intelligente" },
+    name: "AJ-HUB-B",
+    image: "/images/ajax-hub-b.jpg",
+    badge: "AJAX",
+    description: {
+      pt: "Central inteligente responsável por gerenciar todos os dispositivos do sistema de alarme Ajax, garantindo comunicação rápida, segura e estável entre sensores, sirenes, controles e aplicativo.",
+      en: "Smart hub responsible for managing all Ajax alarm system devices, ensuring fast, secure, and stable communication between sensors, sirens, controls, and the app.",
+      fr: "Centrale intelligente responsable de la gestion de tous les dispositifs du système d'alarme Ajax, garantissant une communication rapide, sécurisée et stable.",
+    },
+    benefits: {
+      pt: [
+        "Controla todos os dispositivos do sistema",
+        "Comunicação segura e criptografada",
+        "Gerenciamento pelo aplicativo",
+        "Notificações em tempo real",
+        "Compatível com sensores, sirenes e controles Ajax",
+        "Conexão estável",
+        "Ideal para projetos residenciais e comerciais",
+        "Base principal do sistema de alarme",
+      ],
+      en: [
+        "Controls all system devices",
+        "Secure and encrypted communication",
+        "App management",
+        "Real-time notifications",
+        "Compatible with Ajax sensors, sirens, and controls",
+        "Stable connection",
+        "Ideal for residential and commercial projects",
+        "Main base of the alarm system",
+      ],
+      fr: [
+        "Contrôle tous les dispositifs du système",
+        "Communication sécurisée et chiffrée",
+        "Gestion par application",
+        "Notifications en temps réel",
+        "Compatible avec les capteurs, sirènes et commandes Ajax",
+        "Connexion stable",
+        "Idéal pour les projets résidentiels et commerciaux",
+        "Base principale du système d'alarme",
+      ],
+    },
+    application: {
+      pt: "Indicado para residências, empresas, lojas, escritórios, condomínios e ambientes que precisam de uma central confiável para controle completo do sistema de segurança.",
+      en: "Recommended for homes, businesses, stores, offices, condominiums, and environments that need a reliable hub for complete security system control.",
+      fr: "Recommandé pour les résidences, entreprises, magasins, bureaux, copropriétés et environnements nécessitant une centrale fiable pour le contrôle complet du système de sécurité.",
+    },
+  },
+  {
+    id: "aj-motioncamoutdoor-w",
+    category: { pt: "Sensor Externo com Fotoverificação", en: "Outdoor Motion Cam with Photo Verification", fr: "Capteur Extérieur avec Photovérification" },
+    name: "AJ-MOTIONCAMOUTDOOR-W",
+    image: "/images/ajax-motioncamoutdoor-w.jpg",
+    badge: "AJAX",
+    description: {
+      pt: "Detector externo de movimento com câmera integrada para fotoverificação de alarmes, permitindo visualizar rapidamente o que causou o disparo do sistema.",
+      en: "Outdoor motion detector with integrated camera for alarm photo verification, allowing you to quickly see what triggered the system.",
+      fr: "Détecteur de mouvement extérieur avec caméra intégrée pour la photovérification des alarmes, permettant de visualiser rapidement ce qui a déclenché le système.",
+    },
+    benefits: {
+      pt: [
+        "Detecta movimento em áreas externas",
+        "Câmera para fotoverificação",
+        "Confirma ocorrências reais",
+        "Reduz falsos alarmes",
+        "Tecnologia sem fio",
+        "Resistente para uso externo",
+        "Ideal para quintais, fachadas e perímetros",
+        "Integração com sistema Ajax",
+        "Segurança avançada com registro visual",
+      ],
+      en: [
+        "Detects motion in outdoor areas",
+        "Camera for photo verification",
+        "Confirms real incidents",
+        "Reduces false alarms",
+        "Wireless technology",
+        "Resistant for outdoor use",
+        "Ideal for backyards, facades, and perimeters",
+        "Ajax system integration",
+        "Advanced security with visual record",
+      ],
+      fr: [
+        "Détecte les mouvements en zones extérieures",
+        "Caméra pour photovérification",
+        "Confirme les incidents réels",
+        "Réduit les fausses alarmes",
+        "Technologie sans fil",
+        "Résistant pour usage extérieur",
+        "Idéal pour jardins, façades et périmètres",
+        "Intégration avec le système Ajax",
+        "Sécurité avancée avec enregistrement visuel",
+      ],
+    },
+    application: {
+      pt: "Indicado para áreas externas, fachadas, garagens, quintais, empresas, entradas principais e locais que precisam de monitoramento com confirmação visual.",
+      en: "Recommended for outdoor areas, facades, garages, backyards, businesses, main entrances, and locations that need monitoring with visual confirmation.",
+      fr: "Recommandé pour les zones extérieures, façades, garages, jardins, entreprises, entrées principales et lieux nécessitant une surveillance avec confirmation visuelle.",
+    },
+  },
+];
 
 // Mapeamento de imagens para produtos relacionados (Unsplash Premium)
 const PRODUCT_IMAGES: Record<string, string> = {
@@ -118,6 +320,12 @@ const PRODUCT_IMAGES: Record<string, string> = {
   "fibra ótica": "https://images.unsplash.com/photo-1551703599-6b3e8379aa8c?auto=format&fit=crop&w=600&q=80",
   "racks murais e de chão": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80",
   "painéis de distribuição": "https://images.unsplash.com/photo-1563770660941-20978e870e26?auto=format&fit=crop&w=600&q=80"
+};
+
+// Verifica se o serviço atual é intrusão/alarme para exibir os produtos Ajax
+const isIntrusaoService = (slug: string) => {
+  const s = slug.toLowerCase();
+  return s.includes("intrusao") || s.includes("intrusão") || s.includes("alarme") || s.includes("alarm");
 };
 
 export function ServiceDetail({ slug, onNavigate, services, pages, lang = "pt" }: ServiceDetailProps) {
@@ -267,6 +475,38 @@ export function ServiceDetail({ slug, onNavigate, services, pages, lang = "pt" }
 
   const mainImage = resolveMediaUrl(service.image, "");
   const iconName = (service as any).icon || (service as any).iconName || "Camera";
+
+  // WhatsApp helper for Ajax products
+  const getProductWhatsApp = (productName: string) => {
+    const num = "351918880788";
+    const text = lang === "pt"
+      ? `Olá Cotton Dome, tenho interesse no produto ${productName}. Gostaria de receber um orçamento.`
+      : lang === "en"
+      ? `Hello Cotton Dome, I'm interested in the product ${productName}. I'd like to receive a quote.`
+      : `Bonjour Cotton Dome, je suis intéressé par le produit ${productName}. Je souhaite recevoir un devis.`;
+    return `https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(text)}`;
+  };
+
+  // Show Ajax products section only for alarm/intrusion service
+  const showAjaxProducts = isIntrusaoService(slug);
+
+  // Labels per lang
+  const labels = {
+    ajaxTitle: {
+      pt: "Produtos e Soluções para Intrusão e Sistema de Alarme",
+      en: "Products & Solutions for Intrusion and Alarm Systems",
+      fr: "Produits et Solutions pour Intrusion et Système d'Alarme",
+    },
+    ajaxSubtitle: {
+      pt: "Equipamentos profissionais Ajax Systems selecionados para proteção residencial e comercial de alto desempenho.",
+      en: "Professional Ajax Systems equipment selected for high-performance residential and commercial protection.",
+      fr: "Équipements professionnels Ajax Systems sélectionnés pour une protection résidentielle et commerciale haute performance.",
+    },
+    application: { pt: "Aplicação", en: "Application", fr: "Application" },
+    benefits: { pt: "Benefícios", en: "Benefits", fr: "Avantages" },
+    requestQuote: { pt: "Solicitar Orçamento", en: "Request Quote", fr: "Demander un Devis" },
+    interest: { pt: "Tenho Interesse", en: "I'm Interested", fr: "Je suis Intéressé" },
+  };
 
   return (
     <main className="bg-[#050505] text-[#CFCFCF] min-h-screen">
@@ -418,78 +658,222 @@ export function ServiceDetail({ slug, onNavigate, services, pages, lang = "pt" }
         </div>
       </section>
 
-      {/* 4. PRODUTOS RELACIONADOS COM DESCRIÇÃO EXPLICATIVA E BENEFÍCIO (NOVO DESIGN PREMIUM) */}
-      <section className="py-20 bg-[#0a0a0a] relative overflow-hidden border-t border-[#1a1a1a]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-xl sm:text-2xl font-display font-bold text-white tracking-wide uppercase mb-3">
-              {t.serviceDetail.relatedEquipments}
-            </h2>
-            <p className="text-xs sm:text-sm text-gray-400 font-sans leading-relaxed">
-              {t.serviceDetail.relatedEquipmentsDesc}
-            </p>
-          </div>
+      {/* ============================================================ */}
+      {/* 4. PRODUTOS AJAX — SEÇÃO EXCLUSIVA PARA INTRUSÃO/ALARME       */}
+      {/* ============================================================ */}
+      {showAjaxProducts && (
+        <section className="py-24 bg-[#080808] relative overflow-hidden border-t border-[#1a1a1a]">
+          {/* Ambient lights */}
+          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-[#E2AF55]/4 blur-[160px] pointer-events-none" />
+          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-[#C28D35]/3 blur-[140px] pointer-events-none" />
+          <div className="absolute inset-0 tech-grid pointer-events-none opacity-20" />
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-6">
-            {products.map((prod: any, idx: number) => {
-              const cleanProdKey = prod.toLowerCase().trim();
-              const productTrans = t.productsDict[cleanProdKey];
-              const bgImg = PRODUCT_IMAGES[cleanProdKey] || "https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=600&q=80";
-              
-              if (productTrans) {
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            {/* Header */}
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E2AF55]/10 border border-[#E2AF55]/30 text-[#E2AF55] mb-5"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span className="font-mono text-[10px] uppercase tracking-widest font-bold">Ajax Systems</span>
+              </motion.div>
+
+              <motion.h2
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-2xl sm:text-3xl font-display font-extrabold text-white tracking-tight mb-4 uppercase"
+              >
+                {labels.ajaxTitle[lang]}
+              </motion.h2>
+
+              <motion.p
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="text-sm text-[#CFCFCF] font-sans leading-relaxed"
+              >
+                {labels.ajaxSubtitle[lang]}
+              </motion.p>
+            </div>
+
+            {/* Product Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+              {AJAX_PRODUCTS.map((product, idx) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                  className="flex flex-col rounded-xl overflow-hidden border border-[#222] hover:border-[#E2AF55]/40 transition-all duration-500 bg-[#0f0f0f] group"
+                  style={{ minHeight: "600px" }}
+                >
+                  {/* Product Image */}
+                  <div className="relative h-52 bg-[#0a0a0a] border-b border-[#1a1a1a] overflow-hidden flex items-center justify-center">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-700 pointer-events-none"
+                    />
+                    {/* Ajax badge */}
+                    <span className="absolute top-3 left-3 px-2 py-0.5 rounded font-mono text-[9px] font-extrabold uppercase tracking-widest text-black bg-[#E2AF55] border border-[#C28D35] shadow">
+                      {product.badge}
+                    </span>
+                    {/* Gold corner accent */}
+                    <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#0f0f0f] to-transparent pointer-events-none" />
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex flex-col flex-grow p-5">
+                    {/* Category */}
+                    <span className="font-mono text-[9px] uppercase tracking-widest text-[#E2AF55] mb-2 font-bold">
+                      {product.category[lang]}
+                    </span>
+
+                    {/* Product name */}
+                    <h3 className="font-display font-extrabold text-sm text-white tracking-wide mb-3 group-hover:text-[#E2AF55] transition-colors uppercase leading-tight">
+                      {product.name}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-xs text-[#CFCFCF] font-sans leading-relaxed mb-4">
+                      {product.description[lang]}
+                    </p>
+
+                    {/* Benefits */}
+                    <div className="mb-4">
+                      <strong className="font-mono text-[9px] uppercase tracking-widest text-[#E2AF55] block mb-2">
+                        {labels.benefits[lang]}:
+                      </strong>
+                      <ul className="space-y-1.5">
+                        {product.benefits[lang].slice(0, 5).map((b, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <span className="text-[#E2AF55] mt-0.5 flex-shrink-0 text-xs">✓</span>
+                            <span className="text-[10px] text-[#D9D9D9] font-sans leading-tight">{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Application */}
+                    <div className="border-t border-[#1a1a1a] pt-3 mb-4 flex-grow">
+                      <strong className="font-mono text-[9px] uppercase tracking-widest text-[#E2AF55] block mb-1">
+                        {labels.application[lang]}:
+                      </strong>
+                      <p className="text-[10px] text-gray-400 font-sans leading-relaxed italic">
+                        {product.application[lang]}
+                      </p>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-col gap-2 mt-auto">
+                      <button
+                        onClick={() => {
+                          const el = document.getElementById("contacto-direto");
+                          if (el) el.scrollIntoView({ behavior: "smooth" });
+                        }}
+                        className="w-full py-3 btn-gold-premium text-black font-display font-extrabold uppercase tracking-widest text-[10px] rounded transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <ShoppingCart className="w-3.5 h-3.5" />
+                        <span>{labels.requestQuote[lang]}</span>
+                      </button>
+                      <a
+                        href={getProductWhatsApp(product.name)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full py-2.5 border border-[#25D366]/40 hover:border-[#25D366] bg-[#25D366]/5 hover:bg-[#25D366]/15 text-[#25D366] rounded font-display font-bold uppercase tracking-widest text-[10px] transition-all duration-300 flex items-center justify-center gap-2"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        <span>{labels.interest[lang]}</span>
+                      </a>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 4b. PRODUTOS RELACIONADOS (genérico para outros serviços) */}
+      {!showAjaxProducts && (
+        <section className="py-20 bg-[#0a0a0a] relative overflow-hidden border-t border-[#1a1a1a]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <h2 className="text-xl sm:text-2xl font-display font-bold text-white tracking-wide uppercase mb-3">
+                {t.serviceDetail.relatedEquipments}
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-400 font-sans leading-relaxed">
+                {t.serviceDetail.relatedEquipmentsDesc}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-6">
+              {products.map((prod: any, idx: number) => {
+                const cleanProdKey = prod.toLowerCase().trim();
+                const productTrans = t.productsDict[cleanProdKey];
+                const bgImg = PRODUCT_IMAGES[cleanProdKey] || "https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=600&q=80";
+                
+                if (productTrans) {
+                  return (
+                    <div
+                      key={idx}
+                      className="card-luxury p-3 sm:p-5 rounded-xl group relative overflow-hidden flex flex-col justify-between border border-[#222] hover:border-[#E2AF55]/40 transition-all duration-300 min-h-[160px] sm:min-h-[185px]"
+                    >
+                      {/* Background image related to the product */}
+                      <div 
+                        className="absolute inset-0 bg-cover bg-center opacity-[0.04] group-hover:opacity-[0.12] transition-opacity duration-500 pointer-events-none filter brightness-75 contrast-125"
+                        style={{ backgroundImage: `url(${bgImg})` }}
+                      />
+                      {/* Subtle bottom gradient to ensure text readability */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/30 to-transparent pointer-events-none" />
+
+                      <div className="relative z-10">
+                        <h3 className="font-display font-bold text-xs sm:text-sm text-white tracking-wide mb-1 sm:mb-2 group-hover:text-[#E2AF55] transition-colors leading-tight">
+                          {productTrans.title}
+                        </h3>
+                        <p className="text-[10px] sm:text-xs text-[#CFCFCF] font-sans leading-normal sm:leading-relaxed mb-3 line-clamp-3">
+                          {productTrans.description}
+                        </p>
+                      </div>
+                      <div className="mt-auto border-t border-[#222] pt-2 text-[9px] sm:text-[10px] text-gray-500 group-hover:text-gray-400 transition-colors font-mono relative z-10">
+                        <strong className="text-[#E2AF55] font-semibold uppercase text-[8px] sm:text-[9px] block mb-0.5">
+                          {lang === "pt" ? "Benefício" : lang === "en" ? "Benefit" : "Avantage"}:
+                        </strong>
+                        {productTrans.benefit}
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Fallback
                 return (
                   <div
                     key={idx}
-                    className="card-luxury p-3 sm:p-5 rounded-xl group relative overflow-hidden flex flex-col justify-between border border-[#222] hover:border-[#E2AF55]/40 transition-all duration-300 min-h-[160px] sm:min-h-[185px]"
+                    className="card-luxury p-3 sm:p-5 rounded-xl group flex flex-col items-center justify-center text-center min-h-[60px] sm:min-h-[80px] border border-[#222] relative overflow-hidden"
                   >
-                    {/* Background image related to the product */}
                     <div 
-                      className="absolute inset-0 bg-cover bg-center opacity-[0.04] group-hover:opacity-[0.12] transition-opacity duration-500 pointer-events-none filter brightness-75 contrast-125"
+                      className="absolute inset-0 bg-cover bg-center opacity-[0.03] pointer-events-none"
                       style={{ backgroundImage: `url(${bgImg})` }}
                     />
-                    {/* Subtle bottom gradient to ensure text readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/30 to-transparent pointer-events-none" />
-
-                    <div className="relative z-10">
-                      <h3 className="font-display font-bold text-xs sm:text-sm text-white tracking-wide mb-1 sm:mb-2 group-hover:text-[#E2AF55] transition-colors leading-tight">
-                        {productTrans.title}
-                      </h3>
-                      <p className="text-[10px] sm:text-xs text-[#CFCFCF] font-sans leading-normal sm:leading-relaxed mb-3 line-clamp-3">
-                        {productTrans.description}
-                      </p>
-                    </div>
-                    <div className="mt-auto border-t border-[#222] pt-2 text-[9px] sm:text-[10px] text-gray-500 group-hover:text-gray-400 transition-colors font-mono relative z-10">
-                      <strong className="text-[#E2AF55] font-semibold uppercase text-[8px] sm:text-[9px] block mb-0.5">
-                        {lang === "pt" ? "Benefício" : lang === "en" ? "Benefit" : "Avantage"}:
-                      </strong>
-                      {productTrans.benefit}
-                    </div>
+                    <span className="text-[10px] sm:text-xs text-[#D9D9D9] font-sans font-medium capitalize group-hover:text-white transition-colors relative z-10">
+                      {prod}
+                    </span>
                   </div>
                 );
-              }
-
-              // Fallback
-              return (
-                <div
-                  key={idx}
-                  className="card-luxury p-3 sm:p-5 rounded-xl group flex flex-col items-center justify-center text-center min-h-[60px] sm:min-h-[80px] border border-[#222] relative overflow-hidden"
-                >
-                  <div 
-                    className="absolute inset-0 bg-cover bg-center opacity-[0.03] pointer-events-none"
-                    style={{ backgroundImage: `url(${bgImg})` }}
-                  />
-                  <span className="text-[10px] sm:text-xs text-[#D9D9D9] font-sans font-medium capitalize group-hover:text-white transition-colors relative z-10">
-                    {prod}
-                  </span>
-                </div>
-              );
-            })}
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
 
-      {/* 4b. GALERIA VISUAL DO SERVIÇO */}
+      {/* 4c. GALERIA VISUAL DO SERVIÇO */}
       {galleryImages && galleryImages.length > 0 && (
         <section className="py-20 bg-[#050505] relative overflow-hidden border-t border-[#1a1a1a]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
