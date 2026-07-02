@@ -12,7 +12,8 @@ echo "<h2>Verificação de Ficheiros e Pastas</h2>";
 $paths = [
     'Config' => __DIR__ . '/api/config.php',
     'Data Dir' => __DIR__ . '/api/data/',
-    'Uploads Dir' => __DIR__ . '/uploads/'
+    'Uploads Dir' => __DIR__ . '/uploads/',
+    'Credentials File' => __DIR__ . '/api/data/credentials.json'
 ];
 
 foreach ($paths as $name => $path) {
@@ -20,6 +21,9 @@ foreach ($paths as $name => $path) {
     if (file_exists($path)) {
         echo "Existe. ";
         echo is_writable($path) ? "Escritível." : "NÃO escritível.";
+        if ($name === 'Credentials File') {
+            echo " Conteúdo: " . htmlspecialchars(file_get_contents($path));
+        }
     } else {
         echo "Não existe. Tentando criar... ";
         if ($name === 'Data Dir' || $name === 'Uploads Dir') {
@@ -42,6 +46,7 @@ try {
         echo "<p style='color: green;'>✓ api/config.php incluído com sucesso!</p>";
         $data = readData();
         echo "<p style='color: green;'>✓ Dados lidos com sucesso! Nome da empresa: " . ($data['settings']['company_name'] ?? 'N/A') . "</p>";
+        echo "<p>ADMIN_USERNAME em config: " . ADMIN_USERNAME . "</p>";
     } else {
         echo "<p style='color: red;'>Ficheiro api/config.php não encontrado.</p>";
     }
