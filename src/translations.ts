@@ -71,12 +71,15 @@ export interface TranslationDictionary {
       armazens: { name: string; desc: string };
     };
   };
-  partners: {
+  outlet: {
     tag: string;
     title: string;
     subtitle: string;
-    badge: string;
-    certified: string;
+    viewProduct: string;
+    requestQuote: string;
+    whatsapp: string;
+    badgePromo: string;
+    badgeOutlet: string;
   };
   howWeWork: {
     tag: string;
@@ -258,12 +261,15 @@ export const TRANSLATIONS: Record<"pt" | "en" | "fr", TranslationDictionary> = {
         armazens: { name: "Armazéns", desc: "Organização estrutural de redes de comunicações, UPS para racks, videovigilância perimetral e portões seccionados de alta durabilidade." }
       }
     },
-    partners: {
-      tag: "Parceiros Tecnológicos",
-      title: "Marcas que confiam na nossa engenharia",
-      subtitle: "Trabalhamos em estreita colaboração com os fabricantes líderes globais para integrar equipamentos certificados de máxima fiabilidade.",
-      badge: "PARCEIRO OFICIAL",
-      certified: "EQUIPAMENTOS 100% HOMOLOGADOS"
+    outlet: {
+      tag: "Outlet / Promoção",
+      title: "Equipamentos em Destaque com Desconto",
+      subtitle: "Aproveite as nossas condições especiais em sistemas de intrusão e alarme. Equipamentos de alta segurança com preços sob consulta e instalação profissional incluída.",
+      viewProduct: "Ver Produto",
+      requestQuote: "Solicitar Orçamento",
+      whatsapp: "Falar no WhatsApp",
+      badgePromo: "PROMOÇÃO",
+      badgeOutlet: "OUTLET"
     },
     howWeWork: {
       tag: "Metodologia",
@@ -935,12 +941,15 @@ export const TRANSLATIONS: Record<"pt" | "en" | "fr", TranslationDictionary> = {
         armazens: { name: "Warehouses", desc: "Structural organization of communications networks, UPS for racks, peripheral video surveillance and high-durability sectional doors." }
       }
     },
-    partners: {
-      tag: "Technological Partners",
-      title: "Brands that trust our engineering",
-      subtitle: "We work in close collaboration with leading global manufacturers to integrate certified equipment of maximum reliability.",
-      badge: "OFFICIAL PARTNER",
-      certified: "100% CERTIFIED EQUIPMENT"
+    outlet: {
+      tag: "Outlet / Special Offers",
+      title: "Featured Equipment with Discounts",
+      subtitle: "Take advantage of our special conditions on intrusion and alarm systems. High-security equipment with prices on request and professional installation included.",
+      viewProduct: "View Product",
+      requestQuote: "Request Quote",
+      whatsapp: "Chat on WhatsApp",
+      badgePromo: "PROMO",
+      badgeOutlet: "OUTLET"
     },
     howWeWork: {
       tag: "Methodology",
@@ -1612,12 +1621,15 @@ export const TRANSLATIONS: Record<"pt" | "en" | "fr", TranslationDictionary> = {
         armazens: { name: "Entrepôts", desc: "Organisation structurelle des réseaux de communications, onduleurs (UPS) pour baies, vidéosurveillance périphérique et portes sectionnelles durables." }
       }
     },
-    partners: {
-      tag: "Partenaires Technologiques",
-      title: "Des marques qui font confiance à notre ingénierie",
-      subtitle: "Nous travaillons en étroite collaboration avec les principaux fabricants mondiaux pour intégrer des équipements certifiés d'une fiabilité maximale.",
-      badge: "PARTENAIRE OFFICIEL",
-      certified: "ÉQUIPEMENTS 100% HOMOLOGUÉS"
+    outlet: {
+      tag: "Outlet / Promotions",
+      title: "Équipements en Vedette avec Réduction",
+      subtitle: "Profitez de nos conditions spéciales sur les systèmes d'intrusion et d'alarme. Équipements de haute sécurité avec prix sur demande et installation professionnelle incluse.",
+      viewProduct: "Voir le produit",
+      requestQuote: "Demander un devis",
+      whatsapp: "Discuter sur WhatsApp",
+      badgePromo: "PROMO",
+      badgeOutlet: "OUTLET"
     },
     howWeWork: {
       tag: "Méthodologie",

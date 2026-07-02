@@ -5,6 +5,7 @@ import { SOLUTIONS, CONTACT_INFO } from "../data";
 import { SiteSettings, DbService } from "../types";
 import { TRANSLATIONS } from "../translations";
 import { submitContactMessage } from "../lib/database";
+import { mapSlugToKey } from "../slugUtils";
 
 interface ContactFormProps {
   selectedService: string;
@@ -98,12 +99,12 @@ export function ContactForm({ selectedService, onClearService, settings, service
   // Get active solutions to populate dropdown
   const dropdownServices = services && services.length > 0 
     ? services.map(s => {
-        const mappedKey = s.slug === "alarme-intrusao" ? "intrusao" : s.slug === "controle-acesso" ? "acessos" : s.slug === "ups-energia" ? "ups" : s.slug === "redes-estruturadas" ? "redes" : s.slug;
+        const mappedKey = mapSlugToKey(s.slug);
         const localTrans = t.services[mappedKey];
         return { id: s.id, title: localTrans ? localTrans.title : s.title };
       }) 
     : SOLUTIONS.map(s => {
-        const mappedKey = s.id === "alarme-intrusao" ? "intrusao" : s.id === "controle-acesso" ? "acessos" : s.id === "ups-energia" ? "ups" : s.id === "redes-estruturadas" ? "redes" : s.id;
+        const mappedKey = mapSlugToKey(s.id);
         const localTrans = t.services[mappedKey];
         return { id: s.id, title: localTrans ? localTrans.title : s.title };
       });

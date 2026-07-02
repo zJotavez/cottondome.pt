@@ -6,6 +6,7 @@ import { ArrowLeft, CheckCircle2, ShieldCheck, HelpCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { DbService, DbServicePage } from "../types";
 import { TRANSLATIONS } from "../translations";
+import { mapSlugToKey } from "../slugUtils";
 
 const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
@@ -16,18 +17,6 @@ interface ServiceDetailProps {
   pages?: DbServicePage[];
   lang?: "pt" | "en" | "fr";
 }
-
-const mapSlugToKey = (slug: string): string => {
-  if (slug === "alarme-intrusao" || slug === "intrusao-sistemas-alarme") return "intrusao";
-  if (slug === "controle-acesso" || slug === "controlo-de-acessos") return "acessos";
-  if (slug === "ups-energia" || slug === "ups-sistemas-energia") return "ups";
-  if (slug === "redes-estruturadas" || slug === "redes-network-solutions") return "redes";
-  if (slug === "cctv-videovigilancia") return "cctv";
-  if (slug === "detecao-de-incendio") return "incendio";
-  if (slug === "portas-seguranca-portoes-seccionados") return "portas-portoes";
-  if (slug === "serralharia-ferro-inox") return "serralharia";
-  return slug;
-};
 
 const mapIdToKey = (id: string | number): "residencias" | "condominios" | "empresas" | "comercio" | "industrias" | "armazens" => {
   const map: Record<string | number, "residencias" | "condominios" | "empresas" | "comercio" | "industrias" | "armazens"> = {
@@ -134,8 +123,9 @@ const PRODUCT_IMAGES: Record<string, string> = {
 export function ServiceDetail({ slug, onNavigate, services, pages, lang = "pt" }: ServiceDetailProps) {
   const t = TRANSLATIONS[lang];
 
-  // Resolve service from DB or static fallback
-  const service = services?.find((s) => s.slug === slug) || SERVICES_DATA.find((s) => s.slug === slug);
+  // Resolve service from DB or static fallback (matching slug or mapped slug)
+  const service = services?.find((s) => s.slug === slug || mapSlugToKey(s.slug) === mapSlugToKey(slug)) 
+    || SERVICES_DATA.find((s) => s.slug === slug || mapSlugToKey(s.slug) === mapSlugToKey(slug));
   const pageDetails = pages?.find((p) => p.service_id === service?.id);
 
   // Safe JSON Parsing helper
@@ -207,7 +197,7 @@ export function ServiceDetail({ slug, onNavigate, services, pages, lang = "pt" }
   const benefits = lang === "pt" ? rawBenefits : (serviceTrans ? [serviceTrans.slogan, serviceTrans.shortDesc] : rawBenefits);
 
   const products = parseJsonArray(pageDetails?.related_products, (service as any).products || []);
-  const staticService = SERVICES_DATA.find((s) => s.slug === slug);
+  const staticService = SERVICES_DATA.find((s) => s.slug === slug || mapSlugToKey(s.slug) === mapSlugToKey(slug));
   const galleryImages = parseJsonArray(pageDetails?.gallery_images, staticService?.galleryImages || []);
 
   const workSteps = {

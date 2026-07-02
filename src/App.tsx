@@ -4,7 +4,7 @@ import { Hero } from "./components/Hero";
 import { Pilares } from "./components/Pilares";
 import { Solutions } from "./components/Solutions";
 import { Environments } from "./components/Environments";
-import { Partners } from "./components/Partners";
+import { Outlet } from "./components/Outlet";
 import { HowWeWork } from "./components/HowWeWork";
 import { Projects } from "./components/Projects";
 import { HeroQuote } from "./components/HeroQuote";
@@ -286,9 +286,10 @@ export default function App() {
           {/* Bento Grid: Environments Served */}
           <Environments lang={language} />
 
-          {/* Prestigious Partners */}
-          <Partners 
-            suppliers={dbData?.suppliers}
+          {/* Seção Outlet / Produtos em Promoção */}
+          <Outlet 
+            onNavigate={navigate}
+            onSelectService={handleSelectService}
             lang={language}
           />
 
