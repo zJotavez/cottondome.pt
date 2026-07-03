@@ -68,19 +68,19 @@ export function Footer({ onNavigate, settings, lang = "pt" }: FooterProps) {
             <a 
               href="#home" 
               onClick={(e) => handleLinkClick(e, "#home")}
-              className="flex items-center gap-2 mb-6 group"
+              className="flex items-center gap-3 mb-6 group"
             >
               <img 
                 src={logoSrc} 
                 alt="Cotton Dome Logo" 
-                className="w-10 h-10 object-contain" 
+                className="w-12 h-12 object-contain transition-transform duration-500 group-hover:scale-105" 
               />
               <div className="flex flex-col">
-                <span className="font-display text-sm tracking-widest text-white font-bold leading-none">
+                <span className="text-white font-bold tracking-widest text-lg leading-none uppercase">
                   COTTON DOME
                 </span>
-                <span className="text-[9px] font-sans font-semibold tracking-wider text-[#C28D35] leading-none mt-1">
-                  SECURITY SOLUTIONS LDA
+                <span className="text-[#C28D35] text-[9px] tracking-[0.25em] font-semibold uppercase mt-1 leading-none">
+                  SECURITY SOLUTIONS <span className="text-white bg-[#C28D35]/20 px-1 rounded-[1px] text-[8px] ml-0.5">LDA</span>
                 </span>
               </div>
             </a>
@@ -183,9 +183,16 @@ export function Footer({ onNavigate, settings, lang = "pt" }: FooterProps) {
 
         {/* Bottom copyright disclaimer bar */}
         <div className="border-t border-[#1e1e1e] pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-[11px] text-gray-500 font-sans text-center sm:text-left">
-            © {currentYear} Cotton Dome LDA. {lang === "pt" ? "Todos os direitos reservados." : lang === "en" ? "All rights reserved." : "Tous droits réservés."}
-          </p>
+          <div className="flex items-center gap-2">
+            <img 
+              src={logoSrc} 
+              alt="Cotton Dome Logo" 
+              className="w-5 h-5 object-contain opacity-40 hover:opacity-100 transition-opacity duration-300" 
+            />
+            <p className="text-[11px] text-gray-500 font-sans text-center sm:text-left">
+              © {currentYear} Cotton Dome LDA. {lang === "pt" ? "Todos os direitos reservados." : lang === "en" ? "All rights reserved." : "Tous droits réservés."}
+            </p>
+          </div>
           <div className="flex gap-6 text-[10px] text-gray-500 font-sans">
             <span className="hover:text-[#C28D35] cursor-pointer transition-colors">
               {lang === "pt" ? "Termos de Utilização" : lang === "en" ? "Terms of Use" : "Conditions d'Utilisation"}
