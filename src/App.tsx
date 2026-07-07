@@ -261,6 +261,7 @@ export default function App() {
           services={dbData?.services}
           pages={dbData?.service_pages}
           lang={language}
+          products={dbData?.products}
         />
       ) : (
         // Render full home page
@@ -291,6 +292,7 @@ export default function App() {
             onNavigate={navigate}
             onSelectService={handleSelectService}
             lang={language}
+            products={dbData?.products}
           />
 
           {/* Chronological Workflow */}

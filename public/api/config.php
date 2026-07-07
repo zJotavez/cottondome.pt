@@ -43,7 +43,7 @@ if (!is_dir(DATA_DIR)) {
 // Carregar credenciais (do credentials.json ou padrão)
 $credFile = DATA_DIR . 'credentials.json';
 $adminUser = 'suporte@domme.pt';
-$adminPassHash = password_hash('#CD2026lda', PASSWORD_DEFAULT);
+$adminPassHash = password_hash('CottonDome2026_SecureAdminPass!', PASSWORD_DEFAULT);
 
 if (file_exists($credFile)) {
     $creds = json_decode(file_get_contents($credFile), true);

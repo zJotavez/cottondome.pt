@@ -1,10 +1,10 @@
 <?php
-require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../config.php';
 header('Content-Type: application/json; charset=utf-8');
 requireAuth();
 
 $body = json_decode(file_get_contents('php://input'), true) ?: [];
-$data = readData();
+$data = readData(true);
 $gallery = $data['gallery'] ?? [];
 $action = $body['action'] ?? 'save';
 $id = intval($body['id'] ?? 0);
@@ -12,7 +12,8 @@ $id = intval($body['id'] ?? 0);
 if ($action === 'delete') {
     $gallery = array_values(array_filter($gallery, fn($g) => intval($g['id']) !== $id));
     $data['gallery'] = $gallery;
-    writeData($data);
+    writeData($data, true);
+    logChange('Galeria', 'Eliminou o item de galeria ID ' . $id);
     jsonResponse(true, null, 'Item de galeria eliminado com sucesso.');
 }
 
@@ -41,7 +42,8 @@ if ($action === 'save') {
     }
     
     $data['gallery'] = array_values($gallery);
-    writeData($data);
+    writeData($data, true);
+    logChange('Galeria', 'Gravou o item de galeria: ' . ($body['title'] ?? ''));
     jsonResponse(true, null, 'Item de galeria gravado com sucesso.');
 }
 

@@ -7,6 +7,7 @@ interface OutletProps {
   onNavigate: (path: string) => void;
   onSelectService?: (serviceName: string) => void;
   lang?: "pt" | "en" | "fr";
+  products?: any[];
 }
 
 // ============================================================
@@ -123,8 +124,23 @@ const OUTLET_PRODUCTS = [
   },
 ];
 
-export function Outlet({ onNavigate, onSelectService, lang = "pt" }: OutletProps) {
+export function Outlet({ onNavigate, onSelectService, lang = "pt", products }: OutletProps) {
   const t = TRANSLATIONS[lang];
+
+  const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+  const resolveMediaUrl = (url: string | undefined, defaultUrl: string) => {
+    if (!url) return defaultUrl;
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+      return url;
+    }
+    const cleanUrl = url.replace(/^\//, '');
+    if (API_BASE) {
+      return `${API_BASE}/${cleanUrl}`;
+    }
+    const base = import.meta.env.BASE_URL || "/";
+    const cleanBase = base.endsWith('/') ? base : `${base}/`;
+    return `${cleanBase}${cleanUrl}`;
+  };
 
   const handleRequestQuote = () => {
     if (onSelectService) {
@@ -147,6 +163,39 @@ export function Outlet({ onNavigate, onSelectService, lang = "pt" }: OutletProps
       : `Bonjour Cotton Dome, j'ai vu le produit "${productName}" dans la section Outlet et je souhaite obtenir un devis.`;
     return `https://api.whatsapp.com/send?phone=${cleanNumber}&text=${encodeURIComponent(text)}`;
   };
+
+  // Mapear os produtos do banco ou usar os estáticos
+  const displayProducts = Array.isArray(products) && products.length > 0
+    ? products
+        .filter((p: any) => p.is_active === 1 && p.is_featured === 1)
+        .map((p: any) => ({
+          id: p.id,
+          badge: p.is_featured ? "outlet" : "promo",
+          icon: Zap, // Ícone padrão
+          image: p.image,
+          category: {
+            pt: p.category || "Produto",
+            en: p.category || "Product",
+            fr: p.category || "Produit"
+          },
+          name: p.name,
+          description: {
+            pt: p.description || p.short_description || "",
+            en: p.description || p.short_description || "",
+            fr: p.description || p.short_description || ""
+          },
+          highlight: {
+            pt: p.short_description || "",
+            en: p.short_description || "",
+            fr: p.short_description || ""
+          },
+          benefits: {
+            pt: p.benefits || [],
+            en: p.benefits || [],
+            fr: p.benefits || []
+          }
+        }))
+    : OUTLET_PRODUCTS;
 
   // Texts per lang
   const labels = {
@@ -216,10 +265,11 @@ export function Outlet({ onNavigate, onSelectService, lang = "pt" }: OutletProps
 
         {/* Product Cards Grid — 2 cols tablet, 4 cols desktop */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-          {OUTLET_PRODUCTS.map((product, idx) => {
-            const Icon = product.icon;
+          {displayProducts.map((product, idx) => {
+            const Icon = product.icon || Zap;
             const isOutlet = product.badge === "outlet";
             const badgeText = isOutlet ? labels.badgeOutlet[lang] : labels.badgePromo[lang];
+            const imgSrc = resolveMediaUrl(product.image, "/images/logo.png");
 
             return (
               <motion.div
@@ -234,7 +284,7 @@ export function Outlet({ onNavigate, onSelectService, lang = "pt" }: OutletProps
                 {/* Product Image */}
                 <div className="relative h-52 bg-[#0a0a0a] border-b border-[#1a1a1a] overflow-hidden flex items-center justify-center">
                   <img
-                    src={product.image}
+                    src={imgSrc}
                     alt={product.name}
                     className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-700 pointer-events-none"
                   />

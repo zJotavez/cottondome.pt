@@ -1,10 +1,10 @@
 <?php
-require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../config.php';
 header('Content-Type: application/json; charset=utf-8');
 requireAuth();
 
 $body = json_decode(file_get_contents('php://input'), true) ?: [];
-$data = readData();
+$data = readData(true);
 $suppliers = $data['suppliers'] ?? [];
 $action = $body['action'] ?? 'save';
 $id = intval($body['id'] ?? 0);
@@ -12,7 +12,8 @@ $id = intval($body['id'] ?? 0);
 if ($action === 'delete') {
     $suppliers = array_values(array_filter($suppliers, fn($s) => intval($s['id']) !== $id));
     $data['suppliers'] = $suppliers;
-    writeData($data);
+    writeData($data, true);
+    logChange('Fornecedores', 'Eliminou o fornecedor ID ' . $id);
     jsonResponse(true, null, 'Fornecedor eliminado com sucesso.');
 }
 
@@ -40,7 +41,8 @@ if ($action === 'save') {
     }
     
     $data['suppliers'] = array_values($suppliers);
-    writeData($data);
+    writeData($data, true);
+    logChange('Fornecedores', 'Gravou as informações do fornecedor: ' . ($body['name'] ?? ''));
     jsonResponse(true, null, 'Fornecedor gravado com sucesso.');
 }
 
