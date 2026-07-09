@@ -4,7 +4,7 @@ import {
   FileText, Users, Image as ImageIcon, MessageSquare, Globe, LogOut, 
   Plus, Trash2, Edit3, Save, Eye, Check, X, Upload, Copy, RefreshCw, 
   ChevronRight, Menu, HelpCircle, Phone, Mail, MapPin, ExternalLink, 
-  List, Shield, Search, Database, CloudLightning, ArrowUp, ArrowDown
+  List, Shield, Search, Database, CloudLightning, ArrowUp, ArrowDown, Tag
 } from "lucide-react";
 import { LucideIcon } from "./LucideIcon";
 import {
@@ -993,6 +993,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     { id: "about", label: "Sobre Nós", icon: Users },
     { id: "services", label: "Serviços", icon: Cpu },
     { id: "products", label: "Produtos", icon: Shield },
+    { id: "outlet", label: "Outlet", icon: Tag },
     { id: "suppliers", label: "Fornecedores", icon: List },
     { id: "gallery", label: "Projetos / Galeria", icon: ImageIcon },
     { id: "contactos", label: "Contactos", icon: Phone },
@@ -2217,6 +2218,298 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                           >
                             <option value={0}>Não (Normal)</option>
                             <option value={1}>Sim (Exibir Outlet)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] uppercase font-mono tracking-wider text-gray-400 mb-1.5">Estado</label>
+                          <select 
+                            value={editingProduct.is_active ?? 1} 
+                            onChange={(e) => setEditingProduct({ ...editingProduct, is_active: parseInt(e.target.value) })}
+                            className="w-full bg-[#161616] border border-gray-800 rounded px-4 py-2.5 text-white text-xs focus:outline-none"
+                          >
+                            <option value={1}>Ativo</option>
+                            <option value={0}>Inativo</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] uppercase font-mono tracking-wider text-gray-400 mb-1.5">Descrição Completa</label>
+                        <textarea 
+                          value={editingProduct.description || ""} 
+                          onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
+                          rows={4}
+                          className="w-full bg-[#161616] border border-gray-800 rounded px-4 py-2.5 text-white text-xs focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 border-t border-gray-955 pt-6">
+                    <button 
+                      type="button" 
+                      onClick={() => setEditingProduct(null)}
+                      className="px-5 py-3 bg-[#161616] hover:bg-[#222] border border-gray-800 rounded text-xs font-bold uppercase text-gray-400 cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={actionLoading === "product"}
+                      className="px-6 py-3 bg-[#D4AF37] hover:bg-[#FFD700] disabled:bg-gray-800 text-black text-xs font-bold uppercase tracking-widest rounded flex items-center gap-2 cursor-pointer transition shadow"
+                    >
+                      {actionLoading === "product" ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                      <span>Guardar Rascunho</span>
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          )}
+
+          {/* TAB 6.5: OUTLET */}
+          {activeTab === "outlet" && (
+            <div className="space-y-6">
+              {!editingProduct ? (
+                <>
+                  <div className="flex items-center justify-between gap-4 flex-wrap mb-4 font-sans">
+                    <div className="relative max-w-md w-full">
+                      <input 
+                        type="text" 
+                        placeholder="Pesquisar produtos no Outlet..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-[#111] border border-gray-900 rounded pl-10 pr-4 py-2.5 text-white text-xs focus:outline-none focus:border-[#D4AF37] transition font-sans"
+                      />
+                      <Search className="absolute left-3.5 top-3 w-4 h-4 text-gray-500" />
+                    </div>
+                    <button
+                      onClick={() => {
+                        setEditingProduct({
+                          id: "aj-prod-" + Date.now().toString().slice(-4),
+                          name: "",
+                          model: "",
+                          category: "",
+                          brand: "Ajax",
+                          short_description: "",
+                          description: "",
+                          image: "",
+                          gallery: [],
+                          video: "",
+                          features: [],
+                          benefits: [],
+                          service_id: servicesList[0]?.slug || "",
+                          display_order: 1,
+                          is_active: 1,
+                          is_featured: 1 // Default to Outlet
+                        });
+                      }}
+                      className="px-4 py-2.5 bg-[#D4AF37] hover:bg-[#FFD700] text-black font-bold text-xs uppercase tracking-wider rounded transition flex items-center gap-1.5 cursor-pointer shadow"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Adicionar Novo Produto ao Outlet</span>
+                    </button>
+                  </div>
+
+                  {/* Outlet Products Grid / Table */}
+                  <div className="bg-[#111] border border-gray-900 rounded-lg overflow-hidden font-sans">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs text-gray-300 border-collapse">
+                        <thead className="bg-[#161616] text-[10px] uppercase font-mono tracking-wider text-gray-400 border-b border-gray-900">
+                          <tr>
+                            <th className="p-4">Produto (Outlet)</th>
+                            <th className="p-4">Modelo</th>
+                            <th className="p-4">Marca</th>
+                            <th className="p-4">Categoria</th>
+                            <th className="p-4 text-center">Estado</th>
+                            <th className="p-4 text-right">Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-955">
+                          {productsList
+                            .filter(prod => prod.is_featured === 1)
+                            .filter(prod => prod.name.toLowerCase().includes(searchTerm.toLowerCase()) || prod.model?.toLowerCase().includes(searchTerm.toLowerCase()) || prod.category?.toLowerCase().includes(searchTerm.toLowerCase()))
+                            .map((prod) => (
+                                <tr key={prod.id} className="hover:bg-[#161616]/40 transition duration-150">
+                                  <td className="p-4 font-semibold text-white">
+                                    <div className="flex items-center gap-3">
+                                      {prod.image ? (
+                                        <img src={resolveMediaUrl(prod.image)} alt={prod.name} className="w-10 h-10 rounded object-contain bg-black border border-gray-800" />
+                                      ) : (
+                                        <div className="w-10 h-10 bg-black/40 border border-gray-800 flex items-center justify-center rounded"><ImageIcon className="w-4 h-4 text-gray-600" /></div>
+                                      )}
+                                      <span>{prod.name}</span>
+                                    </div>
+                                  </td>
+                                  <td className="p-4 text-gray-400">{prod.model || "-"}</td>
+                                  <td className="p-4 text-gray-500 font-mono">{prod.brand || "Ajax"}</td>
+                                  <td className="p-4 text-gray-400">{prod.category || "-"}</td>
+                                  <td className="p-4 text-center">
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                                      prod.is_active === 1 
+                                        ? "bg-green-950/40 text-green-400 border border-green-900" 
+                                        : "bg-red-950/40 text-red-400 border border-red-900"
+                                    }`}>
+                                      {prod.is_active === 1 ? "Ativo" : "Inativo"}
+                                    </span>
+                                  </td>
+                                  <td className="p-4 text-right space-x-1 whitespace-nowrap">
+                                    <button
+                                      onClick={() => handleEditProductClick(prod)}
+                                      className="p-1.5 bg-gray-900 hover:bg-[#D4AF37] hover:text-black rounded border border-gray-800 text-gray-400 transition cursor-pointer"
+                                      title="Substituir/Editar Produto do Outlet"
+                                    >
+                                      <Edit3 className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteProduct(prod.id)}
+                                      disabled={actionLoading === `delete_prod_${prod.id}`}
+                                      className="p-1.5 bg-gray-900 hover:bg-red-700 hover:text-white rounded border border-gray-800 text-red-400 transition cursor-pointer"
+                                      title="Remover do Outlet (Eliminar)"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </td>
+                                </tr>
+                            ))}
+                            {productsList.filter(prod => prod.is_featured === 1).length === 0 && (
+                              <tr>
+                                <td colSpan={6} className="p-8 text-center text-gray-500">
+                                  Nenhum produto em destaque no Outlet. Clique em "Adicionar Novo Produto ao Outlet".
+                                </td>
+                              </tr>
+                            )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                // EDITING / ADDING NEW PRODUCT FORM (Reuses the same form layout for consistency)
+                <form onSubmit={(e) => {
+                  // Ensure it stays in outlet
+                  if (editingProduct && editingProduct.is_featured !== 1) {
+                    setEditingProduct({...editingProduct, is_featured: 1});
+                  }
+                  handleSaveProductForm(e);
+                }} className="bg-[#111] border border-gray-900 p-8 rounded-lg space-y-6 font-sans">
+                  <div className="flex items-center justify-between border-b border-gray-900 pb-4">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-[#D4AF37]">
+                      {newProductModal ? "Adicionar ao Outlet" : `Substituir/Editar Produto do Outlet: ${editingProduct.name}`}
+                    </h3>
+                    <button 
+                      type="button" 
+                      onClick={() => setEditingProduct(null)}
+                      className="text-gray-400 hover:text-white text-xs font-bold uppercase cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-[10px] uppercase font-mono tracking-wider text-gray-400 mb-1.5">Nome do Produto</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={editingProduct.name || ""} 
+                          onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                          className="w-full bg-[#161616] border border-gray-800 rounded px-4 py-2.5 text-white text-xs focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[10px] uppercase font-mono tracking-wider text-gray-400 mb-1.5">Modelo</label>
+                          <input 
+                            type="text" 
+                            value={editingProduct.model || ""} 
+                            onChange={(e) => setEditingProduct({ ...editingProduct, model: e.target.value })}
+                            className="w-full bg-[#161616] border border-gray-800 rounded px-4 py-2.5 text-white text-xs focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] uppercase font-mono tracking-wider text-gray-400 mb-1.5">Marca</label>
+                          <input 
+                            type="text" 
+                            value={editingProduct.brand || "Ajax"} 
+                            onChange={(e) => setEditingProduct({ ...editingProduct, brand: e.target.value })}
+                            className="w-full bg-[#161616] border border-gray-800 rounded px-4 py-2.5 text-white text-xs focus:outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[10px] uppercase font-mono tracking-wider text-gray-400 mb-1.5">Categoria</label>
+                          <input 
+                            type="text" 
+                            value={editingProduct.category || ""} 
+                            onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
+                            className="w-full bg-[#161616] border border-gray-800 rounded px-4 py-2.5 text-white text-xs focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] uppercase font-mono tracking-wider text-gray-400 mb-1.5">Serviço Relacionado</label>
+                          <select 
+                            value={editingProduct.service_id || ""} 
+                            onChange={(e) => setEditingProduct({ ...editingProduct, service_id: e.target.value })}
+                            className="w-full bg-[#161616] border border-gray-800 rounded px-4 py-2.5 text-white text-xs focus:outline-none"
+                          >
+                            <option value="">Nenhum (Desvinculado)</option>
+                            {servicesList.map(s => (
+                              <option key={s.id} value={s.slug}>{s.title}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] uppercase font-mono tracking-wider text-gray-400 mb-1.5">Descrição Curta</label>
+                        <textarea 
+                          value={editingProduct.short_description || ""} 
+                          onChange={(e) => setEditingProduct({ ...editingProduct, short_description: e.target.value })}
+                          rows={3}
+                          className="w-full bg-[#161616] border border-gray-800 rounded px-4 py-2.5 text-white text-xs focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-[10px] uppercase font-mono tracking-wider text-gray-400 mb-1.5">Imagem Principal</label>
+                        <div className="flex gap-2">
+                          <input 
+                            type="text" 
+                            value={editingProduct.image || ""} 
+                            onChange={(e) => setEditingProduct({ ...editingProduct, image: e.target.value })}
+                            className="flex-1 bg-[#161616] border border-gray-800 rounded px-3 py-2 text-white text-xs"
+                          />
+                          <button type="button" onClick={() => openMediaSelector("product", "image")} className="px-2.5 bg-gray-900 border border-gray-800 text-white rounded text-xs cursor-pointer">Escolher</button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-[10px] uppercase font-mono tracking-wider text-gray-400 mb-1.5">Ordem Exibição</label>
+                          <input 
+                            type="number" 
+                            value={editingProduct.display_order || 0} 
+                            onChange={(e) => setEditingProduct({ ...editingProduct, display_order: parseInt(e.target.value) })}
+                            className="w-full bg-[#161616] border border-gray-800 rounded px-4 py-2.5 text-white text-xs focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] uppercase font-mono tracking-wider text-gray-400 mb-1.5">Destaque Outlet</label>
+                          <select 
+                            value={editingProduct.is_featured ?? 1} 
+                            onChange={(e) => setEditingProduct({ ...editingProduct, is_featured: parseInt(e.target.value) })}
+                            className="w-full bg-[#161616] border border-gray-800 rounded px-4 py-2.5 text-white text-xs focus:outline-none"
+                            disabled
+                          >
+                            <option value={1}>Sim (Outlet)</option>
+                            <option value={0}>Não (Normal)</option>
                           </select>
                         </div>
                         <div>

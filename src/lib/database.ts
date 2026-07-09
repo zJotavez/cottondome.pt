@@ -137,7 +137,7 @@ export async function saveAbout(data: any) {
 // ADMIN: SERVICES
 // ─────────────────────────────────────────
 export async function saveService(service: any) {
-  await request(`${API_BASE}/api/admin/save_services.php`, {
+  return await request(`${API_BASE}/api/admin/save_services.php`, {
     method: 'POST',
     body: JSON.stringify(service),
   });
