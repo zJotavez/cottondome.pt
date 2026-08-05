@@ -137,7 +137,7 @@ export async function saveAbout(data: any) {
 // ADMIN: SERVICES
 // ─────────────────────────────────────────
 export async function saveService(service: any) {
-  await request(`${API_BASE}/api/admin/save_services.php`, {
+  return await request(`${API_BASE}/api/admin/save_services.php`, {
     method: 'POST',
     body: JSON.stringify(service),
   });
@@ -197,4 +197,42 @@ export async function submitContactMessage(data: {
     method: 'POST',
     body: JSON.stringify(data),
   });
+}
+
+// ─────────────────────────────────────────
+// ADMIN: DRAFT & PUBLISH & BACKUP & HISTORY
+// ─────────────────────────────────────────
+export async function getAdminSiteContent() {
+  const res = await request(`${API_BASE}/api/admin/get_draft.php`);
+  return res;
+}
+
+export async function publishChanges() {
+  const res = await request(`${API_BASE}/api/admin/publish.php`);
+  return res;
+}
+
+export async function getHistory() {
+  const res = await request(`${API_BASE}/api/admin/history.php`);
+  return res.data || [];
+}
+
+export async function saveProduct(product: any) {
+  const res = await request(`${API_BASE}/api/admin/save_products.php`, {
+    method: 'POST',
+    body: JSON.stringify({ ...product, action: 'save' }),
+  });
+  return res;
+}
+
+export async function deleteProduct(id: string | number) {
+  const res = await request(`${API_BASE}/api/admin/save_products.php`, {
+    method: 'POST',
+    body: JSON.stringify({ id, action: 'delete' }),
+  });
+  return res;
+}
+
+export function getBackupUrl() {
+  return `${API_BASE}/api/admin/backup.php`;
 }

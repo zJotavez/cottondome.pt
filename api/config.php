@@ -43,7 +43,7 @@ if (!is_dir(DATA_DIR)) {
 // Carregar credenciais (do credentials.json ou padrão)
 $credFile = DATA_DIR . 'credentials.json';
 $adminUser = 'suporte@domme.pt';
-$adminPassHash = password_hash('#CD2026lda', PASSWORD_DEFAULT);
+$adminPassHash = password_hash('CottonDome2026_SecureAdminPass!', PASSWORD_DEFAULT);
 
 if (file_exists($credFile)) {
     $creds = json_decode(file_get_contents($credFile), true);
@@ -58,8 +58,13 @@ if (file_exists($credFile)) {
 define('ADMIN_USERNAME', $adminUser);
 define('ADMIN_PASSWORD_HASH', $adminPassHash);
 
-// Ficheiro principal de conteúdo do site
-define('DATA_FILE', DATA_DIR . 'site_data.json');
+// Ficheiros de conteúdo do site (Rascunho e Publicado)
+define('DATA_FILE_PUBLISHED', DATA_DIR . 'site_data.json');
+define('DATA_FILE_DRAFT', DATA_DIR . 'site_data_draft.json');
+define('DATA_FILE', DATA_FILE_PUBLISHED); // Legado
+
+// Ficheiro de histórico de alterações
+define('HISTORY_FILE', DATA_DIR . 'history.json');
 
 // Ficheiro de mensagens de contacto
 define('MESSAGES_FILE', DATA_DIR . 'messages.json');
@@ -74,15 +79,55 @@ if (!is_dir(UPLOADS_DIR)) {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function readData(): array {
-    if (!file_exists(DATA_FILE)) return getDefaultData();
-    $raw = file_get_contents(DATA_FILE);
+function readData(bool $draft = false): array {
+    $file = $draft ? DATA_FILE_DRAFT : DATA_FILE_PUBLISHED;
+    if (!file_exists($file)) {
+        $otherFile = $draft ? DATA_FILE_PUBLISHED : DATA_FILE_DRAFT;
+        if (file_exists($otherFile)) {
+            $raw = file_get_contents($otherFile);
+            $data = json_decode($raw, true);
+            if ($data) {
+                file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                return $data;
+            }
+        }
+        $default = getDefaultData();
+        file_put_contents($file, json_encode($default, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        return $default;
+    }
+    $raw = file_get_contents($file);
     $data = json_decode($raw, true);
     return $data ?: getDefaultData();
 }
 
-function writeData(array $data): bool {
-    return file_put_contents(DATA_FILE, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) !== false;
+function writeData(array $data, bool $draft = true): bool {
+    $file = $draft ? DATA_FILE_DRAFT : DATA_FILE_PUBLISHED;
+    return file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) !== false;
+}
+
+function publishData(): bool {
+    $draft = readData(true);
+    return writeData($draft, false);
+}
+
+function logChange(string $action, string $contentDesc): void {
+    $history = [];
+    if (file_exists(HISTORY_FILE)) {
+        $history = json_decode(file_get_contents(HISTORY_FILE), true) ?: [];
+    }
+    $user = $_SESSION['admin_user'] ?? 'Administrador';
+    array_unshift($history, [
+        'id'      => time() . '_' . rand(1000, 9999),
+        'user'    => $user,
+        'action'  => $action,
+        'content' => $contentDesc,
+        'date'    => date('Y-m-d'),
+        'time'    => date('H:i:s')
+    ]);
+    if (count($history) > 100) {
+        $history = array_slice($history, 0, 100);
+    }
+    file_put_contents(HISTORY_FILE, json_encode($history, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
 
 function readMessages(): array {
@@ -462,6 +507,98 @@ function getDefaultData(): array {
             ['page' => 'home', 'title' => 'Cotton Dome LDA | Segurança, CCTV, Controlo de Acessos e Automatismos', 'description' => 'Soluções inteligentes em segurança eletrónica, CCTV, videovigilância, controlo de acessos, intrusão, deteção de incêndio, automatismos, redes, telecomunicações e portões de segurança.', 'keywords' => 'Cotton Dome LDA, segurança eletrónica, CCTV, videovigilância, controlo de acessos, automatismos, portões automáticos, deteção de incêndio, sistemas de alarme, redes, telecomunicações, Portugal'],
             ['page' => 'about', 'title' => 'Sobre Nós | Cotton Dome LDA', 'description' => 'Conheça a Cotton Dome LDA, especialista em segurança eletrónica.', 'keywords' => 'Cotton Dome, sobre nós, segurança eletrónica'],
             ['page' => 'contact', 'title' => 'Contacto | Cotton Dome LDA', 'description' => 'Entre em contacto connosco para obter um orçamento gratuito de segurança.', 'keywords' => 'contacto, orçamento, segurança, alarmes']
+        ],
+        'products' => [
+            [
+                'id' => 'aj-combiprotect-s-w',
+                'name' => 'AJ-COMBIPROTECT-S-W',
+                'model' => 'AJ-COMBIPROTECT-S-W',
+                'category' => 'Sensor de Movimento e Quebra de Vidro',
+                'brand' => 'Ajax',
+                'short_description' => 'Detector sem fio que combina sensor de movimento e sensor acústico de quebra de vidro, oferecendo dupla proteção.',
+                'description' => 'Detector sem fio que combina sensor de movimento e sensor acústico de quebra de vidro, oferecendo dupla proteção para ambientes internos com alta precisão.',
+                'image' => '/images/ajax-combiprotect-s-w.jpg',
+                'gallery' => [],
+                'video' => '',
+                'features' => ['Detecta movimento a até 12m', 'Identifica quebra de vidro a até 9m', 'Conexão sem fio Jeweller'],
+                'benefits' => ['Dupla deteção num único sensor', 'Imunidade a animais domésticos até 20kg', 'Autonomia de bateria até 5 anos'],
+                'service_id' => 'intrusao-sistemas-alarme',
+                'display_order' => 1,
+                'is_active' => 1,
+                'is_featured' => 1
+            ],
+            [
+                'id' => 'aj-curtainoutdoor-w',
+                'name' => 'AJ-CURTAINOUTDOOR-W',
+                'model' => 'AJ-CURTAINOUTDOOR-W',
+                'category' => 'Sensor Cortina Externo',
+                'brand' => 'Ajax',
+                'short_description' => 'Detector externo tipo cortina para proteção perimetral de portas, janelas e fachadas.',
+                'description' => 'Detector externo tipo cortina, desenvolvido para proteção perimetral de portas, janelas, fachadas e corredores, criando uma barreira invisível contra invasões.',
+                'image' => '/images/ajax-curtainoutdoor-w.jpg',
+                'gallery' => [],
+                'video' => '',
+                'features' => ['Deteção de movimento tipo cortina', 'Alcance ajustável de 3 a 15 metros', 'Proteção IP54 contra intempéries'],
+                'benefits' => ['Cria barreira protetora invisível', 'Algoritmo inteligente contra alarmes falsos', 'Fácil instalação e calibração'],
+                'service_id' => 'intrusao-sistemas-alarme',
+                'display_order' => 2,
+                'is_active' => 1,
+                'is_featured' => 1
+            ],
+            [
+                'id' => 'aj-fireprotectplus-b',
+                'name' => 'AJ-FIREPROTECTPLUS-B',
+                'model' => 'AJ-FIREPROTECTPLUS-B',
+                'category' => 'Detector de Fumo e Calor Sem Fio',
+                'brand' => 'Ajax',
+                'short_description' => 'Detector sem fio de fumo, temperatura elevada e monóxido de carbono.',
+                'description' => 'Detector inteligente de fumo e calor sem fio que monitoriza a segurança da sua residência ou empresa 24 horas por dia, alertando instantaneamente em caso de fumo ou aumento rápido de temperatura.',
+                'image' => '/images/ajax-fireprotectplus-b.jpg',
+                'gallery' => [],
+                'video' => '',
+                'features' => ['Deteção ótica de fumo', 'Sensor de aumento rápido de temperatura', 'Sirene integrada de 85dB'],
+                'benefits' => ['Alerta acústico local e remoto', 'Funciona independentemente do Hub', 'Bateria integrada de longa duração'],
+                'service_id' => 'intrusao-sistemas-alarme',
+                'display_order' => 3,
+                'is_active' => 1,
+                'is_featured' => 1
+            ],
+            [
+                'id' => 'aj-motioncamoutdoor-w',
+                'name' => 'AJ-MOTIONCAMOUTDOOR-W',
+                'model' => 'AJ-MOTIONCAMOUTDOOR-W',
+                'category' => 'Sensor Externo com Fotoverificação',
+                'brand' => 'Ajax',
+                'short_description' => 'Detector externo com câmera integrada para fotoverificação instantânea de alarmes.',
+                'description' => 'Detector externo de movimento com câmera integrada para fotoverificação de alarmes, permitindo visualizar rapidamente no smartphone o que causou o disparo do sistema, eliminando falsas preocupações.',
+                'image' => '/images/ajax-motioncamoutdoor-w.jpg',
+                'gallery' => [],
+                'video' => '',
+                'features' => ['Câmera HDR integrada', 'Deteção de movimento de 3 a 15 metros', 'Iluminação infravermelha para fotos noturnas'],
+                'benefits' => ['Evita deslocações desnecessárias por falsos alarmes', 'Fotos enviadas em menos de 9 segundos', 'Resistente a condições climáticas extremas'],
+                'service_id' => 'intrusao-sistemas-alarme',
+                'display_order' => 4,
+                'is_active' => 1,
+                'is_featured' => 1
+            ],
+            [
+                'id' => 'aj-hub-b',
+                'name' => 'AJ-HUB-B',
+                'model' => 'AJ-HUB-B',
+                'category' => 'Central de Alarme Inteligente',
+                'brand' => 'Ajax',
+                'short_description' => 'Central inteligente que gerencia todos os dispositivos Ajax com comunicação segura.',
+                'description' => 'Central inteligente responsável por gerenciar todos os dispositivos do sistema de alarme Ajax, garantindo comunicação rápida, segura e estável entre sensores, sirenes, controles e aplicativo.',
+                'image' => '/images/ajax-hub-b.jpg',
+                'gallery' => [],
+                'video' => '',
+                'features' => ['Canal de comunicação Ethernet e GSM', 'Suporta até 100 dispositivos', 'Criptografia Jeweller proprietária'],
+                'benefits' => ['Segurança de dados e conexões redundantes', 'Alertas imediatos em caso de sabotagem', 'Configuração remota via app'],
+                'service_id' => 'intrusao-sistemas-alarme',
+                'display_order' => 5,
+                'is_active' => 1,
+                'is_featured' => 1
+            ]
         ]
     ];
 }

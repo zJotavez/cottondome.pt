@@ -157,7 +157,7 @@ CREATE TABLE IF NOT EXISTS `seo_settings` (
 -- SEED DATA
 -- ========================================================
 
--- Password initial hash for: #CottoDOME2026
+-- Password initial hash for: #CottoDOME2026 (Note: The main authentication is handled in api/config.php without database by default)
 INSERT INTO `users` (`username`, `password_hash`) VALUES
 ('admin', '$2y$10$itNC70RpUyd8RvVDNWct8emq0M6j.vd1QuF/UGoOJeOu3qa.uaGJS');
 

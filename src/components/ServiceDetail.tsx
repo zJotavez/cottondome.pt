@@ -16,6 +16,7 @@ interface ServiceDetailProps {
   services?: DbService[];
   pages?: DbServicePage[];
   lang?: "pt" | "en" | "fr";
+  products?: any[];
 }
 
 const mapIdToKey = (id: string | number): "residencias" | "condominios" | "empresas" | "comercio" | "industrias" | "armazens" => {
@@ -328,7 +329,7 @@ const isIntrusaoService = (slug: string) => {
   return s.includes("intrusao") || s.includes("intrusão") || s.includes("alarme") || s.includes("alarm");
 };
 
-export function ServiceDetail({ slug, onNavigate, services, pages, lang = "pt" }: ServiceDetailProps) {
+export function ServiceDetail({ slug, onNavigate, services, pages, lang = "pt", products: dbProducts }: ServiceDetailProps) {
   const t = TRANSLATIONS[lang];
 
   // Resolve service from DB or static fallback (matching slug or mapped slug)
@@ -488,7 +489,43 @@ export function ServiceDetail({ slug, onNavigate, services, pages, lang = "pt" }
   };
 
   // Show Ajax products section only for alarm/intrusion service
-  const showAjaxProducts = isIntrusaoService(slug);
+  // Se vierem os produtos dinâmicos do banco, filtramos os que têm service_id correspondente ao serviço atual.
+  // Caso contrário, se for o serviço de intrusão, usamos AJAX_PRODUCTS como fallback.
+  const currentServiceId = service?.id;
+  const currentServiceSlug = service?.slug;
+
+  const displayProducts = Array.isArray(dbProducts) && dbProducts.length > 0
+    ? dbProducts
+        .filter((p: any) => p.is_active === 1 && (p.service_id === currentServiceId || p.service_id === currentServiceSlug || p.service_id?.toString() === currentServiceId?.toString()))
+        .map((p: any) => ({
+          id: p.id,
+          badge: p.brand || "AJAX",
+          name: p.name,
+          image: p.image,
+          category: {
+            pt: p.category || "",
+            en: p.category || "",
+            fr: p.category || ""
+          },
+          description: {
+            pt: p.description || p.short_description || "",
+            en: p.description || p.short_description || "",
+            fr: p.description || p.short_description || ""
+          },
+          benefits: {
+            pt: p.benefits || [],
+            en: p.benefits || [],
+            fr: p.benefits || []
+          },
+          application: {
+            pt: p.short_description || "",
+            en: p.short_description || "",
+            fr: p.short_description || ""
+          }
+        }))
+    : (isIntrusaoService(slug) ? AJAX_PRODUCTS : []);
+
+  const showAjaxProducts = displayProducts.length > 0;
 
   // Labels per lang
   const labels = {
@@ -703,7 +740,7 @@ export function ServiceDetail({ slug, onNavigate, services, pages, lang = "pt" }
 
             {/* Product Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-              {AJAX_PRODUCTS.map((product, idx) => (
+              {displayProducts.map((product, idx) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 30 }}
@@ -716,7 +753,7 @@ export function ServiceDetail({ slug, onNavigate, services, pages, lang = "pt" }
                   {/* Product Image */}
                   <div className="relative h-52 bg-[#0a0a0a] border-b border-[#1a1a1a] overflow-hidden flex items-center justify-center">
                     <img
-                      src={product.image}
+                      src={resolveMediaUrl(product.image, "/images/logo.png")}
                       alt={product.name}
                       className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-700 pointer-events-none"
                     />
