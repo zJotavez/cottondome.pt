@@ -187,12 +187,20 @@ export function Footer({ onNavigate, settings, lang = "pt" }: FooterProps) {
             © {currentYear} Cotton Dome LDA. {lang === "pt" ? "Todos os direitos reservados." : lang === "en" ? "All rights reserved." : "Tous droits réservés."}
           </p>
           <div className="flex gap-6 text-[10px] text-gray-500 font-sans">
-            <span className="hover:text-[#C28D35] cursor-pointer transition-colors">
+            <a
+              href="/politica-de-privacidade"
+              onClick={(e) => { e.preventDefault(); onNavigate("/politica-de-privacidade"); }}
+              className="hover:text-[#C28D35] cursor-pointer transition-colors"
+            >
               {lang === "pt" ? "Termos de Utilização" : lang === "en" ? "Terms of Use" : "Conditions d'Utilisation"}
-            </span>
-            <span className="hover:text-[#C28D35] cursor-pointer transition-colors">
+            </a>
+            <a
+              href="/politica-de-privacidade"
+              onClick={(e) => { e.preventDefault(); onNavigate("/politica-de-privacidade"); }}
+              className="hover:text-[#C28D35] cursor-pointer transition-colors"
+            >
               {lang === "pt" ? "Política de Privacidade" : lang === "en" ? "Privacy Policy" : "Politique de Confidentialité"}
-            </span>
+            </a>
           </div>
         </div>
 

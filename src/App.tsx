@@ -12,6 +12,7 @@ import { About } from "./components/About";
 import { ContactForm } from "./components/ContactForm";
 import { Footer } from "./components/Footer";
 import { ServiceDetail } from "./components/ServiceDetail";
+import { PrivacyPolicy } from "./components/PrivacyPolicy";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { LanguageSelector } from "./components/LanguageSelector";
 import { ChatBot } from "./components/ChatBot";
@@ -227,6 +228,9 @@ export default function App() {
     );
   }
 
+  // 2. CONDITIONAL ROUTING: Privacy Policy
+  const isPrivacyPage = currentPath === "/politica-de-privacidade";
+
   // Public Layout logic
   const isServicePage = currentPath.startsWith("/servicos/");
 
@@ -253,7 +257,10 @@ export default function App() {
         lang={language}
       />
 
-      {isServicePage ? (
+      {isPrivacyPage ? (
+        // Render Privacy Policy page
+        <PrivacyPolicy onNavigate={navigate} lang={language} />
+      ) : isServicePage ? (
         // Render dynamic service details page
         <ServiceDetail 
           slug={currentPath.replace("/servicos/", "")} 
