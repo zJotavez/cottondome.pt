@@ -1,0 +1,9 @@
+# Cotton Dome LDA - robots.txt
+# https://www.domme.pt
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: https://www.domme.pt/sitemap.xml
